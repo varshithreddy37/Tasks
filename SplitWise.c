@@ -14,7 +14,7 @@ int main()
     
     // Bill for each would be total code divided by number of people
     each_share = total_bill/people;
-    
+    printf("Echi padedham");
     printf("\ntotal bill: $%.2f", total_bill);
     printf("\nEach person should pay: $%.2f\n", each_share);
     return 0;
