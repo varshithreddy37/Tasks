@@ -1,0 +1,65 @@
+import java.util.Scanner;
+public class BillSplitter {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        final int MAX_PEOPLE = 1000;
+        double[] shares = new double[MAX_PEOPLE];
+        int numPeople;
+
+        System.out.print("Enter total bill amount: ");
+        double totalBill = sc.nextDouble();
+
+        System.out.print("Enter number of people (max 1000): ");
+        numPeople = sc.nextInt();
+
+        if (numPeople <= 0 || numPeople > MAX_PEOPLE) {
+            System.out.println("Invalid number of people.");
+            return;
+        }
+
+        System.out.println("How would you like to split the bill?");
+        System.out.println("1. By percentage");
+        System.out.println("2. By fixed amount");
+        System.out.print("Enter your choice (1 or 2): ");
+        int choice = sc.nextInt();
+
+        switch (choice) {
+            case 1:
+                double totalPercent = 0;
+                for (int i = 0; i < numPeople; i++) {
+                    System.out.print("Enter percentage for person " + (i + 1) + ": ");
+                    double percent = sc.nextDouble();
+                    totalPercent += percent;
+                    shares[i] = (percent / 100.0) * totalBill;
+                }
+                if (Math.abs(totalPercent - 100.0) > 0.01) {
+                    System.out.println("Error: Total percentage must be 100%. You entered " + totalPercent + "%.");
+                    return;
+                }
+                break;
+
+            case 2:
+                double totalEntered = 0;
+                for (int i = 0; i < numPeople; i++) {
+                    System.out.print("Enter amount for person " + (i + 1) + ": ");
+                    shares[i] = sc.nextDouble();
+                    totalEntered += shares[i];
+                }
+                if (Math.abs(totalEntered - totalBill) > 0.01) {
+                    System.out.println("Error: Total entered amount doesn't match the bill. You entered " + totalEntered);
+                    return;
+                }
+                break;
+
+            default:
+                System.out.println("Invalid choice.");
+                return;
+        }
+
+        System.out.println("\n Bill Split ");
+        for (int i = 0; i < numPeople; i++) {
+            System.out.printf("Person %d pays: ₹%.2f%n", i + 1, shares[i]);
+        }
+        sc.close();
+    }
+}
