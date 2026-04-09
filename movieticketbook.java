@@ -229,7 +229,7 @@ try {
             System.out.println("Data saved successfully!");
 
         } catch (Exception e) {
-            System.out.println("Error saving data!");
+            System.out.println("");
         }
 
         // Receipt
