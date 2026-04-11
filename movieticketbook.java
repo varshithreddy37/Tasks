@@ -11,6 +11,7 @@ public class MovieTicketBookingApp {
     // ANSI Colors
     public static final String GREEN = "\u001B[32m";
     public static final String RED = "\u001B[31m";
+    public static final String RESET = "\u001B[0m";
 
     public static void main(String[] args) {
 
@@ -118,9 +119,9 @@ System.out.println("\nSeat Layout (Green = Available, Red = Booked)");
             for (int j = 0; j < seatsPerRow[selectedScreen]; j++) {
 
                 if (seats[selectedScreen][i][j] == SeatStatus.AVAILABLE) {
-                    System.out.print(GREEN + "A ");
+                    System.out.print(GREEN + "A " + RESET);
                 } else {
-                    System.out.print(RED + "B ");
+                    System.out.print(RED + "B " + RESET);
                 }
             }
             System.out.println();
@@ -141,7 +142,7 @@ System.out.println("\nSeat Layout (Green = Available, Red = Booked)");
             int s = sc.nextInt() - 1;
 
             if (seats[selectedScreen][r][s] == SeatStatus.BOOKED) {
-                System.out.println(RED + "Seat already booked! Choose another.");
+                System.out.println(RED + "Seat already booked! Choose another." + RESET);
                 i--;
             } else {
 
@@ -159,10 +160,11 @@ System.out.println("\nSeat Layout (Green = Available, Red = Booked)");
 
                 bookedSeats += "Row " + (r + 1) + " Seat " + (s + 1) + ", ";
 
-                System.out.println(GREEN + "Seat booked successfully!");
                 System.out.println("Your Ticket ID: " + ticketId);
             }
         }
+
+        System.out.println(GREEN + "All seats booked successfully!" + RESET);
 
         sc.nextLine();
 
@@ -196,7 +198,7 @@ System.out.print("\nDo you want to cancel any ticket? (yes/no): ");
                         seats[selectedScreen][r][s] = SeatStatus.AVAILABLE;
                         System.out.println(GREEN + "Ticket cancelled successfully!");
                     } else {
-                        System.out.println(RED + "Seat is available!");
+                        System.out.println(RED + "Seat is available!" + RESET);
                     }
 
                     found = true;
@@ -208,7 +210,7 @@ System.out.print("\nDo you want to cancel any ticket? (yes/no): ");
             }
 
             if (!found) {
-                System.out.println(RED + "Invalid Ticket ID or Seat details!");
+                System.out.println(RED + "Invalid Ticket ID or Seat details!" + RESET);
             }
         }
 
