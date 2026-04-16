@@ -215,23 +215,21 @@ System.out.print("\nDo you want to cancel any ticket? (yes/no): ");
         }
 
 // to save the data
-
 try {
-            FileWriter writer = new FileWriter("tickets.txt");
+            FileWriter fw = new FileWriter("tickets.txt");
 
             for (int i = 0; i < ticketCount; i++) {
-                writer.write(ticketIDs[i] + "," +
-                             ticketScreen[i] + "," +
-                             ticketRow[i] + "," +
-                             ticketSeat[i] + "\n");
+                fw.write(ticketIDs[i] + "," +
+                         ticketScreen[i] + "," +
+                         ticketRow[i] + "," +
+                         ticketSeat[i] + "\n");
             }
 
-
-            writer.close();
-            System.out.println("Data saved successfully!");
+            fw.close();
+            System.out.println("Saved successfully");
 
         } catch (Exception e) {
-            System.out.println("");
+            System.out.println("File not saved");
         }
 
         // Receipt
