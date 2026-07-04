@@ -1,5 +1,9 @@
 import java.util.Scanner;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.IOException;
 
 public class MovieTicketBookingApp {
 
@@ -216,21 +220,27 @@ System.out.print("\nDo you want to cancel any ticket? (yes/no): ");
 
 // to save the data
 try {
-            FileWriter fw = new FileWriter("tickets.txt");
 
-            for (int i = 0; i < ticketCount; i++) {
-                fw.write(ticketIDs[i] + "," +
-                         ticketScreen[i] + "," +
-                         ticketRow[i] + "," +
-                         ticketSeat[i] + "\n");
-            }
+    FileWriter fw = new FileWriter("tickets.txt");
 
-            fw.close();
-            System.out.println("Saved successfully");
+    // Save only active (not cancelled) tickets
+    for (int i = 0; i < ticketCount; i++) {
 
-        } catch (Exception e) {
-            System.out.println("File not saved");
-        }
+        fw.write(ticketIDs[i] + "," +
+                 ticketScreen[i] + "," +
+                 ticketRow[i] + "," +
+                 ticketSeat[i] + "\n");
+    }
+
+    fw.close();
+
+    System.out.println("Data saved successfully!");
+
+} catch (IOException e) {
+
+    e.printStackTrace();
+
+}
 
         // Receipt
         System.out.println("\n");
