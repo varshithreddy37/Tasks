@@ -136,6 +136,7 @@ System.out.println("\nSeat Layout (Green = Available, Red = Booked)");
         int count = sc.nextInt();
 
         String bookedSeats = "";
+        String ticketId = "T" + (ticketCount + 1);
 
         for (int i = 0; i < count; i++) {
 
@@ -153,7 +154,6 @@ System.out.println("\nSeat Layout (Green = Available, Red = Booked)");
                 seats[selectedScreen][r][s] = SeatStatus.BOOKED;
 
                 // creating a ticket 
-                String ticketId = "T" + (ticketCount + 1);
 
                 ticketIDs[ticketCount] = ticketId;
                 ticketScreen[ticketCount] = selectedScreen;
@@ -163,13 +163,11 @@ System.out.println("\nSeat Layout (Green = Available, Red = Booked)");
                 ticketCount++;
 
                 bookedSeats += "Row " + (r + 1) + " Seat " + (s + 1) + ", ";
-
-                System.out.println("Your Ticket ID: " + ticketId);
+                
             }
         }
 
-        System.out.println(GREEN + "All seats booked successfully!" + RESET);
-
+                System.out.println(GREEN + "All seats booked successfully!" + RESET);
         sc.nextLine();
 
 // for cancellation
@@ -181,11 +179,7 @@ System.out.print("\nDo you want to cancel any ticket? (yes/no): ");
             System.out.print("Enter Ticket ID: ");
             String inputId = sc.nextLine();
 
-            System.out.print("Enter Row Number: ");
-            int r = sc.nextInt() - 1;
-
-            System.out.print("Enter Seat Number: ");
-            int s = sc.nextInt() - 1;
+            
             
 // i have used loop through all the stored tickets will be here
 
@@ -193,23 +187,15 @@ System.out.print("\nDo you want to cancel any ticket? (yes/no): ");
 
             for (int i = 0; i < ticketCount; i++) {
 
-                if (ticketIDs[i].equals(inputId) &&
-                    ticketScreen[i] == selectedScreen &&
-                    ticketRow[i] == r &&
-                    ticketSeat[i] == s) {
+                if (ticketIDs[i] != null &&
+                ticketIDs[i].equals(inputId)) {
+                seats[ticketScreen[i]][ticketRow[i]][ticketSeat[i]] =
+        SeatStatus.AVAILABLE;
 
-                    if (seats[selectedScreen][r][s] == SeatStatus.BOOKED) {
-                        seats[selectedScreen][r][s] = SeatStatus.AVAILABLE;
-                        System.out.println(GREEN + "Ticket cancelled successfully!");
-                    } else {
-                        System.out.println(RED + "Seat is available!" + RESET);
-                    }
+ticketIDs[i] = null;
 
-                    found = true;
+found = true;
                     
-                    // here break is for exit the loop immediatley if not waste of time
-                    
-                    break;
                 }
             }
 
@@ -226,12 +212,14 @@ try {
     // Save only active (not cancelled) tickets
     for (int i = 0; i < ticketCount; i++) {
 
+    if (ticketIDs[i] != null) {
+
         fw.write(ticketIDs[i] + "," +
                  ticketScreen[i] + "," +
                  ticketRow[i] + "," +
                  ticketSeat[i] + "\n");
     }
-
+}
     fw.close();
 
     System.out.println("Data saved successfully!");
