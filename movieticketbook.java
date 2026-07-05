@@ -1,10 +1,5 @@
 import java.util.Scanner;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.io.IOException;
-
 public class MovieTicketBookingApp {
 
     // enum for seat status
@@ -34,13 +29,10 @@ public class MovieTicketBookingApp {
 
         // 3D array for screens
         SeatStatus[][][] seats = new SeatStatus[Screens][][];
-
+        String[][][] seatTicketID = new String[Screens][][];
         // storage for tickets
-        String[] ticketIDs = new String[100];
-        int[] ticketScreen = new int[100];
-        int[] ticketRow = new int[100];
-        int[] ticketSeat = new int[100];
-        int ticketCount = 0;
+    
+        int ticketCounter = 1;
 
         // setup for screens
         for (int screen = 0; screen < Screens; screen++) {
@@ -63,15 +55,15 @@ public class MovieTicketBookingApp {
             seatsPerRow[screen] = sc.nextInt();
 
             seats[screen] = new SeatStatus[rows[screen]][seatsPerRow[screen]];
+            seatTicketID[screen] = new String[rows[screen]][seatsPerRow[screen]];
 
             for (int i = 0; i < rows[screen]; i++) {
                 for (int j = 0; j < seatsPerRow[screen]; j++) {
                     seats[screen][i][j] = SeatStatus.AVAILABLE;
-                }
+                    seatTicketID[screen][i][j] = "";                }
             }
-
-            sc.nextLine();
         }
+        // Loading previous data
 try {
             File file = new File("tickets.txt");
 
@@ -84,160 +76,129 @@ try {
                     String line = fileReader.nextLine();
                     String[] data = line.split(",");
 
-                    String id = data[0];
-                    int screen = Integer.parseInt(data[1]);
-                    int r = Integer.parseInt(data[2]);
-                    int s = Integer.parseInt(data[3]);
+                    int screen = Integer.parseInt(data[0]);
+                    int r = Integer.parseInt(data[1]);
+                    int s = Integer.parseInt(data[2]);
+                    String id = data[3];
 
                     seats[screen][r][s] = SeatStatus.BOOKED;
-
-                    ticketIDs[ticketCount] = id;
-                    ticketScreen[ticketCount] = screen;
-                    ticketRow[ticketCount] = r;
-                    ticketSeat[ticketCount] = s;
-
-                    ticketCount++;
+                    seatTicketID[screen][r][s] = id;
+                    int number = Integer.parseInt(id.substring(1));
+                    if (number >= ticketCounter)
+                        ticketCounter = number + 1;
                 }
-
                 fileReader.close();
-                System.out.println("Previous data loaded!");
+                
             }
 
         } catch (Exception e) {
-            System.out.println("Error loading data!");
+            System.out.println("No Previous Data Found.");
         }
+        while (true) {
 
+            System.out.println("\n");
+            System.out.println("MOVIE TICKET BOOKING SYSTEM");
+            System.out.println(",");
+            System.out.println("1. Book Ticket");
+            System.out.println("2. Cancel Ticket");
+            System.out.println("3. View Seats");
+            System.out.println("4. Exit");
+            System.out.print("Enter Choice: ");
 
-        // Selecting the screens here
-        System.out.println("\nSelect Screen to Book Ticket:");
-        for (int i = 0; i < Screens; i++) {
-            System.out.println((i + 1) + ". " + screenName[i] + " - " + movieName[i]);
-        }
+            int choice = sc.nextInt();
+            sc.nextLine();
 
-        int selectedScreen = sc.nextInt() - 1;
+            switch (choice) {
 
-// here is the layout for the seats
-System.out.println("\nSeat Layout (Green = Available, Red = Booked)");
-        for (int i = 0; i < rows[selectedScreen]; i++) {
-            System.out.print("Row " + (i + 1) + ": ");
-            for (int j = 0; j < seatsPerRow[selectedScreen]; j++) {
+                case 1:
+                       System.out.print("Screen: ");
+int screen = sc.nextInt() - 1;
 
-                if (seats[selectedScreen][i][j] == SeatStatus.AVAILABLE) {
-                    System.out.print(GREEN + "A " + RESET);
-                } else {
-                    System.out.print(RED + "B " + RESET);
-                }
-            }
-            System.out.println();
-        }
+System.out.print("Row: ");
+int row = sc.nextInt() - 1;
 
-        //  Booking seats here
-        System.out.print("\nHow many seats do you want to book? ");
-        int count = sc.nextInt();
+System.out.print("Seat: ");
+int seat = sc.nextInt() - 1;
 
-        String bookedSeats = "";
-        String ticketId = "T" + (ticketCount + 1);
+if (seats[screen][row][seat] == SeatStatus.AVAILABLE) {
+    seats[screen][row][seat] = SeatStatus.BOOKED;
+    String ticketID = "T" + ticketCounter++;
+    seatTicketID[screen][row][seat] = ticketID;
+    System.out.println("Booked Successfully. Ticket ID: " + ticketID);
+} else {
+    System.out.println("Seat Already Booked.");
+}
+                    break;
 
-        for (int i = 0; i < count; i++) {
+                case 2:
+                    System.out.print("Enter Ticket ID: ");
+String id = sc.nextLine();
 
-            System.out.print("Enter Row Number: ");
-            int r = sc.nextInt() - 1;
+boolean found = false;
 
-            System.out.print("Enter Seat Number: ");
-            int s = sc.nextInt() - 1;
-
-            if (seats[selectedScreen][r][s] == SeatStatus.BOOKED) {
-                System.out.println(RED + "Seat already booked! Choose another." + RESET);
-                i--;
-            } else {
-
-                seats[selectedScreen][r][s] = SeatStatus.BOOKED;
-
-                // creating a ticket 
-
-                ticketIDs[ticketCount] = ticketId;
-                ticketScreen[ticketCount] = selectedScreen;
-                ticketRow[ticketCount] = r;
-                ticketSeat[ticketCount] = s;
-
-                ticketCount++;
-
-                bookedSeats += "Row " + (r + 1) + " Seat " + (s + 1) + ", ";
-                
+for (int s = 0; s < Screens; s++) {
+    for (int i = 0; i < rows[s]; i++) {
+        for (int j = 0; j < seatsPerRow[s]; j++) {
+            if (seatTicketID[s][i][j].equals(id)) {
+                seats[s][i][j] = SeatStatus.AVAILABLE;
+                seatTicketID[s][i][j] = "";
+                found = true;
             }
         }
-
-                System.out.println(GREEN + "All seats booked successfully!" + RESET);
-        sc.nextLine();
-
-// for cancellation
-System.out.print("\nDo you want to cancel any ticket? (yes/no): ");
-        String cancelChoice = sc.nextLine();
-
-        if (cancelChoice.equalsIgnoreCase("yes")) {
-
-            System.out.print("Enter Ticket ID: ");
-            String inputId = sc.nextLine();
-
-            
-            
-// i have used loop through all the stored tickets will be here
-
-            boolean found = false;
-
-            for (int i = 0; i < ticketCount; i++) {
-
-                if (ticketIDs[i] != null &&
-                ticketIDs[i].equals(inputId)) {
-                seats[ticketScreen[i]][ticketRow[i]][ticketSeat[i]] =
-        SeatStatus.AVAILABLE;
-
-ticketIDs[i] = null;
-
-found = true;
-                    
-                }
-            }
-
-            if (!found) {
-                System.out.println(RED + "Invalid Ticket ID or Seat details!" + RESET);
-            }
-        }
-
-// to save the data
-try {
-
-    FileWriter fw = new FileWriter("tickets.txt");
-
-    // Save only active (not cancelled) tickets
-    for (int i = 0; i < ticketCount; i++) {
-
-    if (ticketIDs[i] != null) {
-
-        fw.write(ticketIDs[i] + "," +
-                 ticketScreen[i] + "," +
-                 ticketRow[i] + "," +
-                 ticketSeat[i] + "\n");
     }
 }
-    fw.close();
 
-    System.out.println("Data saved successfully!");
+System.out.println(found ? "Cancelled Successfully." : "Invalid Ticket ID.");
+                    break;
 
-} catch (IOException e) {
+                case 3:
+                   System.out.print("Screen: ");
+int viewScreen = sc.nextInt() - 1;
 
-    e.printStackTrace();
-
+for (int i = 0; i < rows[viewScreen]; i++) {
+    for (int j = 0; j < seatsPerRow[viewScreen]; j++) {
+        if (seats[viewScreen][i][j] == SeatStatus.AVAILABLE)
+            System.out.print("A ");
+        else
+            System.out.print("B ");
+    }
+    System.out.println();
 }
+                    break;
 
-        // Receipt
-        System.out.println("\n");
-        System.out.println("Screen Name : " + screenName[selectedScreen]);
-        System.out.println("Movie Name  : " + movieName[selectedScreen]);
-        System.out.println("Timing      : " + timing[selectedScreen]);
-        System.out.println("Seats Booked: " + bookedSeats);
-        System.out.println("");
+                case 4:
+                    // Save Data Before Exit
+                    try {
 
-        System.out.println("Have a good day and Enjoy Your Movie");
+                        FileWriter fw = new FileWriter("tickets.txt");
+
+                        for (int s = 0; s < Screens; s++) {
+
+                            for (int i = 0; i < rows[s]; i++) {
+
+                                for (int j = 0; j < seatsPerRow[s]; j++) {
+
+                                    if (seats[s][i][j] == SeatStatus.BOOKED) {
+
+                                        fw.write(s + "," + i + "," + j + "," + seatTicketID[s][i][j] + "\n");
+
+                                    }
+                                }
+                            }
+                        }
+
+                        fw.close();
+
+                    } catch (Exception e) {
+                        System.out.println("Error Saving File");
+                    }
+
+                    System.out.println("Have a great day!");
+                    System.exit(0);
+
+                default:
+                    System.out.println("Invalid Choice.");
+            }
+        }
     }
 }
