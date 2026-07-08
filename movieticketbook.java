@@ -1,5 +1,7 @@
+
 import java.util.Scanner;
 import java.io.*;
+
 public class MovieTicketBookingApp {
 
     // enum for seat status
@@ -16,9 +18,26 @@ public class MovieTicketBookingApp {
 
         Scanner sc = new Scanner(System.in);
 
-        System.out.print("Enter no.of screens: ");
-        int Screens = sc.nextInt();
-        sc.nextLine();
+        int Screens;
+
+        while (true) {
+            System.out.print("Enter no.of screens: ");
+
+            if (!sc.hasNextInt()) {
+                System.out.println("Invalid input! Please enter a number.");
+                sc.next();
+                continue;
+            }
+
+            Screens = sc.nextInt();
+            sc.nextLine();
+
+            if (Screens <= 0) {
+                System.out.println("Invalid input! Please try again.");
+            } else {
+                break;
+            }
+        }
 
         String[] screenName = new String[Screens];
         String[] movieName = new String[Screens];
@@ -31,7 +50,7 @@ public class MovieTicketBookingApp {
         SeatStatus[][][] seats = new SeatStatus[Screens][][];
         String[][][] seatTicketID = new String[Screens][][];
         // storage for tickets
-    
+
         int ticketCounter = 1;
 
         // setup for screens
@@ -39,20 +58,75 @@ public class MovieTicketBookingApp {
 
             System.out.println("\nEnter details for Screen " + (screen + 1));
 
-            System.out.print("Enter Screen Name: ");
-            screenName[screen] = sc.nextLine();
+            while (true) {
+                System.out.print("Enter Screen Name: ");
+                screenName[screen] = sc.nextLine().trim();
 
-            System.out.print("Enter Movie Name: ");
-            movieName[screen] = sc.nextLine();
+                if (!screenName[screen].isEmpty()) {
+                    break;
+                }
 
-            System.out.print("Enter Movie Timing: ");
-            timing[screen] = sc.nextLine();
+                System.out.println("Invalid Screen Name! Try Again.");
+            }
 
-            System.out.print("Enter Number of Rows: ");
-            rows[screen] = sc.nextInt();
+            while (true) {
+                System.out.print("Enter Movie Name: ");
+                movieName[screen] = sc.nextLine().trim();
 
-            System.out.print("Enter Seats per Row: ");
-            seatsPerRow[screen] = sc.nextInt();
+                if (!movieName[screen].isEmpty()) {
+                    break;
+                }
+
+                System.out.println("Invalid Movie Name! Try Again.");
+            }
+
+            while (true) {
+                System.out.print("Enter Movie Timing (HH:MM): ");
+                timing[screen] = sc.nextLine();
+
+                if (timing[screen].matches("([01]\\d|2[0-3]):[0-5]\\d")) {
+                    break;
+                }
+
+                System.out.println("Invalid Time! Try Again.");
+            }
+
+            while (true) {
+                System.out.print("Enter Number of Rows: ");
+
+                if (!sc.hasNextInt()) {
+                    System.out.println("Invalid input!");
+                    sc.next();
+                    continue;
+                }
+
+                rows[screen] = sc.nextInt();
+
+                if (rows[screen] <= 0) {
+                    System.out.println("Rows must be greater than 0.");
+                } else {
+                    break;
+                }
+            }
+
+            while (true) {
+                System.out.print("Enter Seats per Row: ");
+
+                if (!sc.hasNextInt()) {
+                    System.out.println("Invalid input!");
+                    sc.next();
+                    continue;
+                }
+
+                seatsPerRow[screen] = sc.nextInt();
+
+                if (seatsPerRow[screen] <= 0) {
+                    System.out.println("Seats must be greater than 0.");
+                } else {
+                    break;
+                }
+            }
+            sc.nextLine();
 
             seats[screen] = new SeatStatus[rows[screen]][seatsPerRow[screen]];
             seatTicketID[screen] = new String[rows[screen]][seatsPerRow[screen]];
@@ -60,11 +134,12 @@ public class MovieTicketBookingApp {
             for (int i = 0; i < rows[screen]; i++) {
                 for (int j = 0; j < seatsPerRow[screen]; j++) {
                     seats[screen][i][j] = SeatStatus.AVAILABLE;
-                    seatTicketID[screen][i][j] = "";                }
+                    seatTicketID[screen][i][j] = "";
+                }
             }
         }
         // Loading previous data
-try {
+        try {
             File file = new File("tickets.txt");
 
             if (file.exists()) {
@@ -84,11 +159,12 @@ try {
                     seats[screen][r][s] = SeatStatus.BOOKED;
                     seatTicketID[screen][r][s] = id;
                     int number = Integer.parseInt(id.substring(1));
-                    if (number >= ticketCounter)
+                    if (number >= ticketCounter) {
                         ticketCounter = number + 1;
+                    }
                 }
                 fileReader.close();
-                
+
             }
 
         } catch (Exception e) {
@@ -105,65 +181,121 @@ try {
             System.out.println("4. Exit");
             System.out.print("Enter Choice: ");
 
+            if (!sc.hasNextInt()) {
+                System.out.println("Invalid input! Please try again.");
+                sc.next();
+                continue;
+            }
+
             int choice = sc.nextInt();
             sc.nextLine();
-
             switch (choice) {
 
                 case 1:
-                       System.out.print("Screen: ");
-int screen = sc.nextInt() - 1;
+                    System.out.print("Screen: ");
 
-System.out.print("Row: ");
-int row = sc.nextInt() - 1;
+                    if (!sc.hasNextInt()) {
+                        System.out.println("Invalid input! Please try again.");
+                        sc.next();
+                        break;
+                    }
 
-System.out.print("Seat: ");
-int seat = sc.nextInt() - 1;
+                    int screen = sc.nextInt() - 1;
+                    sc.nextLine();
 
-if (seats[screen][row][seat] == SeatStatus.AVAILABLE) {
-    seats[screen][row][seat] = SeatStatus.BOOKED;
-    String ticketID = "T" + ticketCounter++;
-    seatTicketID[screen][row][seat] = ticketID;
-    System.out.println("Booked Successfully. Ticket ID: " + ticketID);
-} else {
-    System.out.println("Seat Already Booked.");
-}
+                    if (screen < 0 || screen >= Screens) {
+                        System.out.println("Invalid Screen! Please try again.");
+                        break;
+                    }
+
+                    System.out.print("Row: ");
+
+                    if (!sc.hasNextInt()) {
+                        System.out.println("Invalid input! Please try again.");
+                        sc.next();
+                        break;
+                    }
+
+                    int row = sc.nextInt() - 1;
+
+                    if (row < 0 || row >= rows[screen]) {
+                        System.out.println("Invalid Row! Please try again.");
+                        break;
+                    }
+
+                    System.out.print("Seat: ");
+
+                    if (!sc.hasNextInt()) {
+                        System.out.println("Invalid input! Please try again.");
+                        sc.next();
+                        break;
+                    }
+
+                    int seat = sc.nextInt() - 1;
+                    sc.nextLine();
+
+                    if (seat < 0 || seat >= seatsPerRow[screen]) {
+                        System.out.println("Invalid Seat! Please try again.");
+                        break;
+                    }
+
+                    if (seats[screen][row][seat] == SeatStatus.AVAILABLE) {
+                        seats[screen][row][seat] = SeatStatus.BOOKED;
+                        String ticketID = "T" + ticketCounter++;
+                        seatTicketID[screen][row][seat] = ticketID;
+                        System.out.println("Booked Successfully. Ticket ID: " + ticketID);
+                    } else {
+                        System.out.println("Seat Already Booked.");
+                    }
                     break;
 
                 case 2:
                     System.out.print("Enter Ticket ID: ");
-String id = sc.nextLine();
+                    String id = sc.nextLine();
 
-boolean found = false;
+                    boolean found = false;
 
-for (int s = 0; s < Screens; s++) {
-    for (int i = 0; i < rows[s]; i++) {
-        for (int j = 0; j < seatsPerRow[s]; j++) {
-            if (seatTicketID[s][i][j].equals(id)) {
-                seats[s][i][j] = SeatStatus.AVAILABLE;
-                seatTicketID[s][i][j] = "";
-                found = true;
-            }
-        }
-    }
-}
+                    for (int s = 0; s < Screens; s++) {
+                        for (int i = 0; i < rows[s]; i++) {
+                            for (int j = 0; j < seatsPerRow[s]; j++) {
+                                if (seatTicketID[s][i][j].equals(id)) {
+                                    seats[s][i][j] = SeatStatus.AVAILABLE;
+                                    seatTicketID[s][i][j] = "";
+                                    found = true;
+                                }
+                            }
+                        }
+                    }
 
-System.out.println(found ? "Cancelled Successfully." : "Invalid Ticket ID.");
+                    System.out.println(found ? "Cancelled Successfully." : "Invalid Ticket ID.");
                     break;
 
                 case 3:
-                   System.out.print("Screen: ");
-int viewScreen = sc.nextInt() - 1;
+                    System.out.print("Screen: ");
 
-for (int i = 0; i < rows[viewScreen]; i++) {
-    for (int j = 0; j < seatsPerRow[viewScreen]; j++) {
-        if (seats[viewScreen][i][j] == SeatStatus.AVAILABLE)
-            System.out.print("A ");
-        else
-            System.out.print("B ");
-    }
-    System.out.println();
-}
+                    if (!sc.hasNextInt()) {
+                        System.out.println("Invalid input! Please try again.");
+                        sc.next();
+                        break;
+                    }
+
+                    int viewScreen = sc.nextInt() - 1;
+
+                    if (viewScreen < 0 || viewScreen >= Screens) {
+                        System.out.println("Invalid Screen! Please try again.");
+                        break;
+                    }
+
+                    for (int i = 0; i < rows[viewScreen]; i++) {
+                        for (int j = 0; j < seatsPerRow[viewScreen]; j++) {
+                            if (seats[viewScreen][i][j] == SeatStatus.AVAILABLE) {
+                                System.out.print("A ");
+                            } else {
+                                System.out.print("B ");
+                            }
+                        }
+                        System.out.println();
+                    }
                     break;
 
                 case 4:
