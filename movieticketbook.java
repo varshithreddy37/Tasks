@@ -1,3 +1,4 @@
+
 import java.util.Scanner;
 import java.io.*;
 
@@ -320,13 +321,14 @@ public class MovieTicketBookingApp {
                         }
 
                         fw.close();
+                        System.out.println("Booking Data Saved Successfully.");
 
                     } catch (Exception e) {
                         System.out.println("Error Saving File");
                     }
 
                     System.out.println("Have a great day!");
-                    System.exit(0);
+                   return;
 
                 default:
                     System.out.println("Invalid Choice.");
