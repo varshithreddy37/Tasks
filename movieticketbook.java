@@ -1,4 +1,3 @@
-
 import java.util.Scanner;
 import java.io.*;
 
@@ -164,11 +163,12 @@ public class MovieTicketBookingApp {
                     }
                 }
                 fileReader.close();
+                System.out.println("Previous booking data loaded successfully.");
 
             }
 
         } catch (Exception e) {
-            System.out.println("No Previous Data Found.");
+            System.out.println("No Previous Data Found. Starting a new session.");
         }
         while (true) {
 
