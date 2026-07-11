@@ -1,3 +1,4 @@
+
 import java.util.Scanner;
 import java.io.*;
 
@@ -240,9 +241,19 @@ public class MovieTicketBookingApp {
                     }
 
                     if (seats[screen][row][seat] == SeatStatus.AVAILABLE) {
+                        System.out.print("Enter Booking Date (DD/MM/YYYY): ");
+                        String bookingDate = sc.nextLine();
+
+                        if (!bookingDate.matches("\\d{2}/\\d{2}/\\d{4}")) {
+                            System.out.println("Invalid Date Format! Please try again.");
+                            break;
+                        }
                         seats[screen][row][seat] = SeatStatus.BOOKED;
                         String ticketID = "T" + ticketCounter++;
                         seatTicketID[screen][row][seat] = ticketID;
+                        System.out.println("Advance Booking Successful.");
+                        System.out.println("Booking Date: " + bookingDate);
+                        System.out.println("Ticket ID: " + ticketID);
                         System.out.println("Booked Successfully. Ticket ID: " + ticketID);
                     } else {
                         System.out.println("Seat Already Booked.");
@@ -327,7 +338,7 @@ public class MovieTicketBookingApp {
                     }
 
                     System.out.println("Have a great day!");
-                   return;
+                    return;
 
                 default:
                     System.out.println("Invalid Choice.");
