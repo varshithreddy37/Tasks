@@ -1,6 +1,8 @@
-
 import java.util.Scanner;
 import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
 
 public class MovieTicketBookingApp {
 
@@ -80,17 +82,7 @@ public class MovieTicketBookingApp {
                 System.out.println("Invalid Movie Name! Try Again.");
             }
 
-            while (true) {
-                System.out.print("Enter Movie Timing (HH:MM): ");
-                timing[screen] = sc.nextLine();
-
-                if (timing[screen].matches("([01]\\d|2[0-3]):[0-5]\\d")) {
-                    break;
-                }
-
-                System.out.println("Invalid Time! Try Again.");
-            }
-
+           
             while (true) {
                 System.out.print("Enter Number of Rows: ");
 
@@ -151,10 +143,10 @@ public class MovieTicketBookingApp {
                     String line = fileReader.nextLine();
                     String[] data = line.split(",");
 
-                    int screen = Integer.parseInt(data[0]);
-                    int r = Integer.parseInt(data[1]);
-                    int s = Integer.parseInt(data[2]);
-                    String id = data[3];
+                    String id = data[0];
+                    int screen = Integer.parseInt(data[1]);
+                    int r = Integer.parseInt(data[2]);
+                    int s = Integer.parseInt(data[3]);
 
                     seats[screen][r][s] = SeatStatus.BOOKED;
                     seatTicketID[screen][r][s] = id;
@@ -241,23 +233,40 @@ public class MovieTicketBookingApp {
                     }
 
                     if (seats[screen][row][seat] == SeatStatus.AVAILABLE) {
-                        System.out.print("Enter Booking Date (DD/MM/YYYY): ");
-                        String bookingDate = sc.nextLine();
 
-                        if (!bookingDate.matches("\\d{2}/\\d{2}/\\d{4}")) {
-                            System.out.println("Invalid Date Format! Please try again.");
-                            break;
-                        }
-                        seats[screen][row][seat] = SeatStatus.BOOKED;
-                        String ticketID = "T" + ticketCounter++;
-                        seatTicketID[screen][row][seat] = ticketID;
-                        System.out.println("Advance Booking Successful.");
-                        System.out.println("Booking Date: " + bookingDate);
-                        System.out.println("Ticket ID: " + ticketID);
-                        System.out.println("Booked Successfully. Ticket ID: " + ticketID);
-                    } else {
-                        System.out.println("Seat Already Booked.");
-                    }
+    while (true) {
+        System.out.print("Enter Booking Date (DD/MM/YYYY): ");
+        String bookingDate = sc.nextLine();
+
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/uuuu")
+                    .withResolverStyle(ResolverStyle.STRICT);
+
+            LocalDate date = LocalDate.parse(bookingDate, formatter);
+
+            if (date.isBefore(LocalDate.now())) {
+                System.out.println("Past date is not allowed. Please try again.");
+                continue;
+            }
+
+            seats[screen][row][seat] = SeatStatus.BOOKED;
+            String ticketID = "T" + ticketCounter++;
+            seatTicketID[screen][row][seat] = ticketID;
+
+            System.out.println("Advance Booking Successful.");
+            System.out.println("Booking Date: " + bookingDate);
+            System.out.println("Ticket ID: " + ticketID);
+            break;
+
+        } catch (Exception e) {
+            System.out.println("Invalid input! Please try again.");
+        }
+    }
+
+} else {
+    System.out.println("Seat Already Booked.");
+}
+                   
                     break;
 
                 case 2:
@@ -323,24 +332,26 @@ public class MovieTicketBookingApp {
 
                                     if (seats[s][i][j] == SeatStatus.BOOKED) {
 
-                                        fw.write(s + "," + i + "," + j + "," + seatTicketID[s][i][j] + "\n");
+                                        fw.write(seatTicketID[s][i][j] + "," + s + "," + i + "," + j + "\n");
+                                        System.out.println("Saving: " + seatTicketID[s][i][j]);
 
                                     }
+
                                 }
                             }
                         }
+                    
 
-                        fw.close();
-                        System.out.println("Booking Data Saved Successfully.");
+                    fw.close();
+                    System.out.println("Booking Data Saved Successfully.");
 
-                    } catch (Exception e) {
+            }catch (Exception e) {
                         System.out.println("Error Saving File");
                     }
 
-                    System.out.println("Have a great day!");
-                    return;
-
-                default:
+            System.out.println("Have a great day!");
+            return;
+    default :
                     System.out.println("Invalid Choice.");
             }
         }
