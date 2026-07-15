@@ -51,6 +51,7 @@ public class MovieTicketBookingApp {
         // 3D array for screens
         SeatStatus[][][] seats = new SeatStatus[Screens][][];
         String[][][] seatTicketID = new String[Screens][][];
+        String[][][] bookingDate = new String[Screens][][];
         // storage for tickets
 
         int ticketCounter = 1;
@@ -81,8 +82,17 @@ public class MovieTicketBookingApp {
 
                 System.out.println("Invalid Movie Name! Try Again.");
             }
+            while (true) {
+                System.out.print("Enter Movie Timing (HH:MM): ");
+                timing[screen] = sc.nextLine().trim();
 
-           
+                if (timing[screen].matches("([01]\\d|2[0-3]):([0-5]\\d)")) {
+                    break;
+                }
+
+                System.out.println("Invalid Timing! Try Again.");
+            }
+
             while (true) {
                 System.out.print("Enter Number of Rows: ");
 
@@ -122,17 +132,19 @@ public class MovieTicketBookingApp {
 
             seats[screen] = new SeatStatus[rows[screen]][seatsPerRow[screen]];
             seatTicketID[screen] = new String[rows[screen]][seatsPerRow[screen]];
-
+            bookingDate[screen] = new String[rows[screen]][seatsPerRow[screen]];
             for (int i = 0; i < rows[screen]; i++) {
                 for (int j = 0; j < seatsPerRow[screen]; j++) {
                     seats[screen][i][j] = SeatStatus.AVAILABLE;
                     seatTicketID[screen][i][j] = "";
+                    bookingDate[screen][i][j] = "";
                 }
             }
+            System.out.println("Screen " + (screen + 1) + " setup complete.");
         }
         // Loading previous data
         try {
-            File file = new File("tickets.txt");
+            File file = new File("d:\\tasks\\tickets.txt");
 
             if (file.exists()) {
 
@@ -234,39 +246,40 @@ public class MovieTicketBookingApp {
 
                     if (seats[screen][row][seat] == SeatStatus.AVAILABLE) {
 
-    while (true) {
-        System.out.print("Enter Booking Date (DD/MM/YYYY): ");
-        String bookingDate = sc.nextLine();
+                        while (true) {
+                            System.out.print("Enter Booking Date (DD/MM/YYYY): ");
+                            String bookingDateInput = sc.nextLine();
 
-        try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/uuuu")
-                    .withResolverStyle(ResolverStyle.STRICT);
+                            try {
+                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/uuuu")
+                                        .withResolverStyle(ResolverStyle.STRICT);
 
-            LocalDate date = LocalDate.parse(bookingDate, formatter);
+                                LocalDate date = LocalDate.parse(bookingDateInput, formatter);
 
-            if (date.isBefore(LocalDate.now())) {
-                System.out.println("Past date is not allowed. Please try again.");
-                continue;
-            }
+                                if (date.isBefore(LocalDate.now())) {
+                                    System.out.println("Past date is not allowed. Please try again.");
+                                    continue;
+                                }
 
-            seats[screen][row][seat] = SeatStatus.BOOKED;
-            String ticketID = "T" + ticketCounter++;
-            seatTicketID[screen][row][seat] = ticketID;
+                                seats[screen][row][seat] = SeatStatus.BOOKED;
+                                String ticketID = "T" + ticketCounter++;
+                                seatTicketID[screen][row][seat] = ticketID;
+                                bookingDate[screen][row][seat] = bookingDateInput;
+                                System.out.println("Advance Booking Successful.");
+                                System.out.println("Booking Date: " + bookingDateInput);
+                                System.out.println("Movie Timing: " + timing[screen]);
+                                System.out.println("Ticket ID: " + ticketID);
+                                break;
 
-            System.out.println("Advance Booking Successful.");
-            System.out.println("Booking Date: " + bookingDate);
-            System.out.println("Ticket ID: " + ticketID);
-            break;
+                            } catch (Exception e) {
+                                System.out.println("Invalid input! Please try again.");
+                            }
+                        }
 
-        } catch (Exception e) {
-            System.out.println("Invalid input! Please try again.");
-        }
-    }
+                    } else {
+                        System.out.println("Seat Already Booked.");
+                    }
 
-} else {
-    System.out.println("Seat Already Booked.");
-}
-                   
                     break;
 
                 case 2:
@@ -322,7 +335,7 @@ public class MovieTicketBookingApp {
                     // Save Data Before Exit
                     try {
 
-                        FileWriter fw = new FileWriter("tickets.txt");
+                        FileWriter fw = new FileWriter("d:\\tasks\\tickets.json");
 
                         for (int s = 0; s < Screens; s++) {
 
@@ -331,8 +344,13 @@ public class MovieTicketBookingApp {
                                 for (int j = 0; j < seatsPerRow[s]; j++) {
 
                                     if (seats[s][i][j] == SeatStatus.BOOKED) {
-
-                                        fw.write(seatTicketID[s][i][j] + "," + s + "," + i + "," + j + "\n");
+                                        fw.write("{/n"
+                                                + "  \"ticketID\": \"" + seatTicketID[s][i][j] + "\",/n"
+                                                + "  \"screen\": " + (s + 1) + ",/n"
+                                                + "  \"row\": " + (i + 1) + ",/n"
+                                                + "  \"seat\": " + (j + 1) + ",/n"
+                                                + "  \"bookingDate\": \"" + bookingDate[s][i][j] + "\"/n"
+                                                + "},/n");
                                         System.out.println("Saving: " + seatTicketID[s][i][j]);
 
                                     }
@@ -340,18 +358,17 @@ public class MovieTicketBookingApp {
                                 }
                             }
                         }
-                    
 
-                    fw.close();
-                    System.out.println("Booking Data Saved Successfully.");
+                        fw.close();
+                        System.out.println("Booking Data Saved Successfully.");
 
-            }catch (Exception e) {
+                    } catch (Exception e) {
                         System.out.println("Error Saving File");
                     }
 
-            System.out.println("Have a great day!");
-            return;
-    default :
+                    System.out.println("Have a great day!");
+                    return;
+                default:
                     System.out.println("Invalid Choice.");
             }
         }
