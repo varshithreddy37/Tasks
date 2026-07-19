@@ -1,10 +1,11 @@
-import java.util.Scanner;
+
 import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
+import java.util.Scanner;
 
-public class MovieTicketBookingApp {
+class MovieTicketBookingApp {
 
     // enum for seat status
     enum SeatStatus {
@@ -144,7 +145,7 @@ public class MovieTicketBookingApp {
         }
         // Loading previous data
         try {
-            File file = new File("d:\\tasks\\tickets.txt");
+            File file = new File("d:\\tasks\\tickets.json");
 
             if (file.exists()) {
 
@@ -162,6 +163,7 @@ public class MovieTicketBookingApp {
 
                     seats[screen][r][s] = SeatStatus.BOOKED;
                     seatTicketID[screen][r][s] = id;
+
                     int number = Integer.parseInt(id.substring(1));
                     if (number >= ticketCounter) {
                         ticketCounter = number + 1;
@@ -197,19 +199,20 @@ public class MovieTicketBookingApp {
             switch (choice) {
 
                 case 1:
-                    System.out.print("Screen: ");
+                    System.out.print("Enter Screen Name: ");
+                    String enteredScreen = sc.nextLine();
 
-                    if (!sc.hasNextInt()) {
-                        System.out.println("Invalid input! Please try again.");
-                        sc.next();
-                        break;
+                    int screen = -1;
+
+                    for (int i = 0; i < Screens; i++) {
+                        if (screenName[i].equalsIgnoreCase(enteredScreen)) {
+                            screen = i;
+                            break;
+                        }
                     }
 
-                    int screen = sc.nextInt() - 1;
-                    sc.nextLine();
-
-                    if (screen < 0 || screen >= Screens) {
-                        System.out.println("Invalid Screen! Please try again.");
+                    if (screen == -1) {
+                        System.out.println("Invalid Screen Name!");
                         break;
                     }
 
@@ -336,6 +339,7 @@ public class MovieTicketBookingApp {
                     try {
 
                         FileWriter fw = new FileWriter("d:\\tasks\\tickets.json");
+                        
 
                         for (int s = 0; s < Screens; s++) {
 
@@ -344,13 +348,15 @@ public class MovieTicketBookingApp {
                                 for (int j = 0; j < seatsPerRow[s]; j++) {
 
                                     if (seats[s][i][j] == SeatStatus.BOOKED) {
-                                        fw.write("{/n"
-                                                + "  \"ticketID\": \"" + seatTicketID[s][i][j] + "\",/n"
-                                                + "  \"screen\": " + (s + 1) + ",/n"
-                                                + "  \"row\": " + (i + 1) + ",/n"
-                                                + "  \"seat\": " + (j + 1) + ",/n"
-                                                + "  \"bookingDate\": \"" + bookingDate[s][i][j] + "\"/n"
-                                                + "},/n");
+                                        fw.write(
+                                                "{\n"
+                                                + "  \"ticketID\": \"" + seatTicketID[s][i][j] + "\",\n"
+                                                + "  \"screen\": " + s + ",\n"
+                                                + "  \"row\": " + i + ",\n"
+                                                + "  \"seat\": " + j + ",\n"
+                                                + "  \"bookingDate\": \"" + bookingDate[s][i][j] + "\"\n"
+                                                + "}\n"
+                                        );
                                         System.out.println("Saving: " + seatTicketID[s][i][j]);
 
                                     }
