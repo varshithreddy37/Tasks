@@ -272,6 +272,41 @@ class MovieTicketBookingApp {
                                 System.out.println("Booking Date: " + bookingDateInput);
                                 System.out.println("Movie Timing: " + timing[screen]);
                                 System.out.println("Ticket ID: " + ticketID);
+                                try {
+
+                        FileWriter fw = new FileWriter("d:\\tasks\\tickets.json");
+                        
+
+                        for (int s = 0; s < Screens; s++) {
+
+                            for (int i = 0; i < rows[s]; i++) {
+
+                                for (int j = 0; j < seatsPerRow[s]; j++) {
+
+                                    if (seats[s][i][j] == SeatStatus.BOOKED) {
+                                        fw.write(
+                                                "{\n"
+                                                + "  \"ticketID\": \"" + seatTicketID[s][i][j] + "\",\n"
+                                                + "  \"screen\": " + s + ",\n"
+                                                + "  \"row\": " + i + ",\n"
+                                                + "  \"seat\": " + j + ",\n"
+                                                + "  \"bookingDate\": \"" + bookingDate[s][i][j] + "\"\n"
+                                                + "}\n"
+                                        );
+                                        System.out.println("Saving: " + seatTicketID[s][i][j]);
+
+                                    }
+
+                                }
+                            }
+                        }
+
+                        fw.close();
+                        System.out.println("Booking Data Saved Successfully.");
+
+                    } catch (Exception e) {
+                        System.out.println("Error Saving File");
+                    }
                                 break;
 
                             } catch (Exception e) {
@@ -297,6 +332,7 @@ class MovieTicketBookingApp {
                                 if (seatTicketID[s][i][j].equals(id)) {
                                     seats[s][i][j] = SeatStatus.AVAILABLE;
                                     seatTicketID[s][i][j] = "";
+                                    bookingDate[s][i][j] = "";
                                     found = true;
                                 }
                             }
@@ -336,41 +372,7 @@ class MovieTicketBookingApp {
 
                 case 4:
                     // Save Data Before Exit
-                    try {
-
-                        FileWriter fw = new FileWriter("d:\\tasks\\tickets.json");
-                        
-
-                        for (int s = 0; s < Screens; s++) {
-
-                            for (int i = 0; i < rows[s]; i++) {
-
-                                for (int j = 0; j < seatsPerRow[s]; j++) {
-
-                                    if (seats[s][i][j] == SeatStatus.BOOKED) {
-                                        fw.write(
-                                                "{\n"
-                                                + "  \"ticketID\": \"" + seatTicketID[s][i][j] + "\",\n"
-                                                + "  \"screen\": " + s + ",\n"
-                                                + "  \"row\": " + i + ",\n"
-                                                + "  \"seat\": " + j + ",\n"
-                                                + "  \"bookingDate\": \"" + bookingDate[s][i][j] + "\"\n"
-                                                + "}\n"
-                                        );
-                                        System.out.println("Saving: " + seatTicketID[s][i][j]);
-
-                                    }
-
-                                }
-                            }
-                        }
-
-                        fw.close();
-                        System.out.println("Booking Data Saved Successfully.");
-
-                    } catch (Exception e) {
-                        System.out.println("Error Saving File");
-                    }
+                    
 
                     System.out.println("Have a great day!");
                     return;
