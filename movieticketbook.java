@@ -143,6 +143,22 @@ class MovieTicketBookingApp {
             }
             System.out.println("Screen " + (screen + 1) + " setup complete.");
         }
+        try {
+            FileWriter theatre = new FileWriter("d:\\tasks\\theatre.txt");
+
+            for (int i = 0; i < Screens; i++) {
+                theatre.write("Screen Name : " + screenName[i] + "\n");
+                theatre.write("Rows : " + rows[i] + "\n");
+                theatre.write("Seats Per Row : " + seatsPerRow[i] + "\n");
+                theatre.write("Movie Name : " + movieName[i] + "\n");
+                theatre.write("Movie Time : " + timing[i] + "\n");
+                theatre.write("\n");
+            }
+
+            theatre.close();
+        } catch (Exception e) {
+            System.out.println("Error saving theatre data.");
+        }
         // Loading previous data
         try {
             File file = new File("d:\\tasks\\tickets.json");
@@ -274,39 +290,40 @@ class MovieTicketBookingApp {
                                 System.out.println("Ticket ID: " + ticketID);
                                 try {
 
-                        FileWriter fw = new FileWriter("d:\\tasks\\tickets.json");
-                        
+                                    FileWriter fw = new FileWriter("d:\\tasks\\tickets.json");
 
-                        for (int s = 0; s < Screens; s++) {
+                                    for (int s = 0; s < Screens; s++) {
 
-                            for (int i = 0; i < rows[s]; i++) {
+                                        for (int i = 0; i < rows[s]; i++) {
 
-                                for (int j = 0; j < seatsPerRow[s]; j++) {
+                                            for (int j = 0; j < seatsPerRow[s]; j++) {
 
-                                    if (seats[s][i][j] == SeatStatus.BOOKED) {
-                                        fw.write(
-                                                "{\n"
-                                                + "  \"ticketID\": \"" + seatTicketID[s][i][j] + "\",\n"
-                                                + "  \"screen\": " + s + ",\n"
-                                                + "  \"row\": " + i + ",\n"
-                                                + "  \"seat\": " + j + ",\n"
-                                                + "  \"bookingDate\": \"" + bookingDate[s][i][j] + "\"\n"
-                                                + "}\n"
-                                        );
-                                        System.out.println("Saving: " + seatTicketID[s][i][j]);
+                                                if (seats[s][i][j] == SeatStatus.BOOKED) {
+                                                    fw.write(
+                                                            "{\n"
+                                                            + "  \"ticketID\": \"" + seatTicketID[s][i][j] + "\",\n"
+                                                            + "  \"screen\": " + s + ",\n"
+                                                            + "  \"row\": " + i + ",\n"
+                                                            + "  \"seat\": " + j + ",\n"
+                                                            + "  \"movieName\": \"" + movieName[s] + "\",\n"
+                                                            + "  \"movieTime\": \"" + timing[s] + "\",\n"
+                                                            + "  \"bookingDate\": \"" + bookingDate[s][i][j] + "\"\n"
+                                                            + "}\n"
+                                                    );
+                                                    System.out.println("Saving: " + seatTicketID[s][i][j]);
 
+                                                }
+
+                                            }
+                                        }
                                     }
 
+                                    fw.close();
+                                    System.out.println("Booking Data Saved Successfully.");
+
+                                } catch (Exception e) {
+                                    System.out.println("Error Saving File");
                                 }
-                            }
-                        }
-
-                        fw.close();
-                        System.out.println("Booking Data Saved Successfully.");
-
-                    } catch (Exception e) {
-                        System.out.println("Error Saving File");
-                    }
                                 break;
 
                             } catch (Exception e) {
@@ -372,7 +389,6 @@ class MovieTicketBookingApp {
 
                 case 4:
                     // Save Data Before Exit
-                    
 
                     System.out.println("Have a great day!");
                     return;
