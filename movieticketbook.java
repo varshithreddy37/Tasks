@@ -173,9 +173,9 @@ class MovieTicketBookingApp {
                     String[] data = line.split(",");
 
                     String id = data[0];
-                    int screen = Integer.parseInt(data[1]);
-                    int r = Integer.parseInt(data[2]);
-                    int s = Integer.parseInt(data[3]);
+                    int screen = Integer.parseInt(data[1]) -1;
+                    int r = Integer.parseInt(data[2]) -1;
+                    int s = Integer.parseInt(data[3]) -1;
 
                     seats[screen][r][s] = SeatStatus.BOOKED;
                     seatTicketID[screen][r][s] = id;
@@ -302,9 +302,9 @@ class MovieTicketBookingApp {
                                                     fw.write(
                                                             "{\n"
                                                             + "  \"ticketID\": \"" + seatTicketID[s][i][j] + "\",\n"
-                                                            + "  \"screen\": " + s + ",\n"
-                                                            + "  \"row\": " + i + ",\n"
-                                                            + "  \"seat\": " + j + ",\n"
+                                                            + "  \"screen\": " + (s + 1) + ",\n"
+                                                            + "  \"row\": " + (i + 1) + ",\n"
+                                                            + "  \"seat\": " + (j + 1) + ",\n"
                                                             + "  \"movieName\": \"" + movieName[s] + "\",\n"
                                                             + "  \"movieTime\": \"" + timing[s] + "\",\n"
                                                             + "  \"bookingDate\": \"" + bookingDate[s][i][j] + "\"\n"
