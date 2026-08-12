@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class MovieTicketBookingApp {
 
@@ -22,23 +24,36 @@ class MovieTicketBookingApp {
         Scanner sc = new Scanner(System.in);
 
         int Screens;
+        File theatreFile = new File("d:\\tasks\\theatre.json");
 
-        while (true) {
-            System.out.print("Enter no.of screens: ");
+        if (theatreFile.exists()) {
 
-            if (!sc.hasNextInt()) {
-                System.out.println("Invalid input! Please enter a number.");
-                sc.next();
-                continue;
-            }
-
-            Screens = sc.nextInt();
-            sc.nextLine();
+            Screens = getScreenCount();
 
             if (Screens <= 0) {
-                System.out.println("Invalid input! Please try again.");
-            } else {
-                break;
+                System.out.println("Invalid theatre.json file.");
+                return;
+            }
+
+        } else {
+
+            while (true) {
+                System.out.print("Enter no.of screens: ");
+
+                if (!sc.hasNextInt()) {
+                    System.out.println("Invalid input! Please enter a number.");
+                    sc.next();
+                    continue;
+                }
+
+                Screens = sc.nextInt();
+                sc.nextLine();
+
+                if (Screens <= 0) {
+                    System.out.println("Invalid input! Please try again.");
+                } else {
+                    break;
+                }
             }
         }
 
@@ -56,121 +71,363 @@ class MovieTicketBookingApp {
         // storage for tickets
 
         int ticketCounter = 1;
+        if (theatreFile.exists()) {
 
-        // setup for screens
+            try {
+
+                String json = readFile("d:\\tasks\\theatre.json");
+
+                Pattern objectPattern
+                        = Pattern.compile("\\{(.*?)\\}", Pattern.DOTALL);
+
+                Matcher matcher = objectPattern.matcher(json);
+
+                int screen = 0;
+
+                while (matcher.find() && screen < Screens) {
+
+                    String object = matcher.group(1);
+
+                    screenName[screen]
+                            = getJsonString(object, "screenName");
+
+                    movieName[screen]
+                            = getJsonString(object, "movieName");
+
+                    timing[screen]
+                            = getJsonString(object, "movieTime");
+
+                    rows[screen]
+                            = getJsonInt(object, "rows");
+
+                    seatsPerRow[screen]
+                            = getJsonInt(object, "seatsPerRow");
+
+                    screen++;
+                }
+
+                System.out.println(
+                        "Previous theatre details loaded successfully.");
+
+                // DISPLAY PREVIOUS THEATRE DETAILS
+                System.out.println("\nPREVIOUS THEATRE DETAILS");
+
+                for (int i = 0; i < Screens; i++) {
+
+                    System.out.println("\nScreen " + (i + 1));
+                    System.out.println("Screen Name  : " + screenName[i]);
+                    System.out.println("Movie Name   : " + movieName[i]);
+                    System.out.println("Movie Timing : " + timing[i]);
+                    System.out.println("Rows         : " + rows[i]);
+                    System.out.println("Seats/Row    : " + seatsPerRow[i]);
+                }
+
+                System.out.print("\nDo you want to add new movies? (Y/N): ");
+
+                String answer = sc.nextLine();
+
+                if (answer.equalsIgnoreCase("Y")) {
+
+                    int newScreens;
+
+                    while (true) {
+
+                        System.out.print("Enter number of new movies/screens: ");
+
+                        if (!sc.hasNextInt()) {
+
+                            System.out.println("Invalid input! Please enter a number.");
+
+                            sc.next();
+                            continue;
+                        }
+
+                        newScreens = sc.nextInt();
+                        sc.nextLine();
+
+                        if (newScreens <= 0) {
+
+                            System.out.println("Enter at least 1.");
+
+                        } else {
+
+                            break;
+                        }
+                    }
+
+                    int oldScreens = Screens;
+                    int totalScreens = oldScreens + newScreens;
+
+                    // Old arrays save
+                    String[] oldScreenName = screenName;
+                    String[] oldMovieName = movieName;
+                    String[] oldTiming = timing;
+
+                    int[] oldRows = rows;
+                    int[] oldSeatsPerRow = seatsPerRow;
+
+                    // New arrays
+                    screenName = new String[totalScreens];
+                    movieName = new String[totalScreens];
+                    timing = new String[totalScreens];
+
+                    rows = new int[totalScreens];
+                    seatsPerRow = new int[totalScreens];
+
+                    // Copying the previous data
+                    for (int i = 0; i < oldScreens; i++) {
+
+                        screenName[i] = oldScreenName[i];
+                        movieName[i] = oldMovieName[i];
+                        timing[i] = oldTiming[i];
+
+                        rows[i] = oldRows[i];
+                        seatsPerRow[i] = oldSeatsPerRow[i];
+                    }
+
+                    // Enter the new movie details
+                    for (int newscreen = oldScreens;
+                            newscreen < totalScreens;
+                            newscreen++) {
+
+                        System.out.println("\nEnter details for Screen "
+                                + (screen + 1));
+
+                        while (true) {
+
+                            System.out.print("Enter Screen Name: ");
+
+                            screenName[screen]
+                                    = sc.nextLine().trim();
+
+                            if (!screenName[screen].isEmpty()) {
+                                break;
+                            }
+
+                            System.out.println("Invalid Screen Name! Try Again.");
+                        }
+
+                        while (true) {
+
+                            System.out.print("Enter Movie Name: ");
+
+                            movieName[screen] = sc.nextLine().trim();
+
+                            if (!movieName[screen].isEmpty()) {
+                                break;
+                            }
+
+                            System.out.println("Invalid Movie Name! Try Again.");
+                        }
+
+                        // Movie Timing
+                        while (true) {
+
+                            System.out.print("Enter Movie Timing (HH:MM): ");
+
+                            timing[screen]
+                                    = sc.nextLine().trim();
+
+                            if (timing[screen].matches("([01]\\d|2[0-3]):([0-5]\\d)")) {
+
+                                break;
+                            }
+
+                            System.out.println("Invalid Timing! Try Again.");
+                        }
+
+                        while (true) {
+
+                            System.out.print("Enter Number of Rows: ");
+
+                            if (!sc.hasNextInt()) {
+
+                                System.out.println("Invalid input!");
+
+                                sc.next();
+                                continue;
+                            }
+
+                            rows[screen] = sc.nextInt();
+
+                            if (rows[screen] <= 0) {
+
+                                System.out.println("Rows must be greater than 0.");
+
+                            } else {
+
+                                break;
+                            }
+                        }
+
+                        // Seats per row
+                        while (true) {
+
+                            System.out.print("Enter Seats per Row: ");
+
+                            if (!sc.hasNextInt()) {
+
+                                System.out.println("Invalid input!");
+
+                                sc.next();
+                                continue;
+                            }
+
+                            seatsPerRow[screen] = sc.nextInt();
+
+                            if (seatsPerRow[screen] <= 0) {
+
+                                System.out.println("Seats must be greater than 0.");
+
+                            } else {
+
+                                break;
+                            }
+                        }
+
+                        sc.nextLine();
+
+                        System.out.println("Screen " + (screen + 1) + " setup complete.");
+                    }
+
+                    Screens = totalScreens;
+                }
+
+            } catch (Exception e) {
+
+                System.out.println(
+                        "Error loading theatre.json.");
+                return;
+            }
+
+        } else {
+
+            // setup for screens
+            for (int screen = 0; screen < Screens; screen++) {
+
+                System.out.println("\nEnter details for Screen " + (screen + 1));
+
+                while (true) {
+                    System.out.print("Enter Screen Name: ");
+                    screenName[screen] = sc.nextLine().trim();
+
+                    if (!screenName[screen].isEmpty()) {
+                        break;
+                    }
+
+                    System.out.println("Invalid Screen Name! Try Again.");
+                }
+
+                while (true) {
+                    System.out.print("Enter Movie Name: ");
+                    movieName[screen] = sc.nextLine().trim();
+
+                    if (!movieName[screen].isEmpty()) {
+                        break;
+                    }
+
+                    System.out.println("Invalid Movie Name! Try Again.");
+                }
+                while (true) {
+                    System.out.print("Enter Movie Timing (HH:MM): ");
+                    timing[screen] = sc.nextLine().trim();
+
+                    if (timing[screen].matches("([01]\\d|2[0-3]):([0-5]\\d)")) {
+                        break;
+                    }
+
+                    System.out.println("Invalid Timing! Try Again.");
+                }
+
+                while (true) {
+                    System.out.print("Enter Number of Rows: ");
+
+                    if (!sc.hasNextInt()) {
+                        System.out.println("Invalid input!");
+                        sc.next();
+                        continue;
+                    }
+
+                    rows[screen] = sc.nextInt();
+
+                    if (rows[screen] <= 0) {
+                        System.out.println("Rows must be greater than 0.");
+                    } else {
+                        break;
+                    }
+                }
+
+                while (true) {
+                    System.out.print("Enter Seats per Row: ");
+
+                    if (!sc.hasNextInt()) {
+                        System.out.println("Invalid input!");
+                        sc.next();
+                        continue;
+                    }
+
+                    seatsPerRow[screen] = sc.nextInt();
+
+                    if (seatsPerRow[screen] <= 0) {
+                        System.out.println("Seats must be greater than 0.");
+                    } else {
+                        break;
+                    }
+                }
+                sc.nextLine();
+
+                System.out.println("Screen " + (screen + 1) + " setup complete.");
+            }
+            try {
+                FileWriter theatre = new FileWriter("d:\\tasks\\theatre.json");
+
+                theatre.write("[\n");
+
+                for (int i = 0; i < Screens; i++) {
+
+                    theatre.write(
+                            "{\n"
+                            + "  \"screenName\": \"" + screenName[i] + "\",\n"
+                            + "  \"rows\": " + rows[i] + ",\n"
+                            + "  \"seatsPerRow\": " + seatsPerRow[i] + ",\n"
+                            + "  \"movieName\": \"" + movieName[i] + "\",\n"
+                            + "  \"movieTime\": \"" + timing[i] + "\"\n"
+                            + "}"
+                    );
+
+                    if (i != Screens - 1) {
+                        theatre.write(",");
+                    }
+                }
+
+                theatre.write("]");
+                theatre.close();
+
+            } catch (Exception e) {
+                System.out.println("Error saving theatre data.");
+            }
+        }
         for (int screen = 0; screen < Screens; screen++) {
 
-            System.out.println("\nEnter details for Screen " + (screen + 1));
+            seats[screen]
+                    = new SeatStatus[rows[screen]][seatsPerRow[screen]];
 
-            while (true) {
-                System.out.print("Enter Screen Name: ");
-                screenName[screen] = sc.nextLine().trim();
+            seatTicketID[screen]
+                    = new String[rows[screen]][seatsPerRow[screen]];
 
-                if (!screenName[screen].isEmpty()) {
-                    break;
-                }
+            bookingDate[screen]
+                    = new String[rows[screen]][seatsPerRow[screen]];
 
-                System.out.println("Invalid Screen Name! Try Again.");
-            }
-
-            while (true) {
-                System.out.print("Enter Movie Name: ");
-                movieName[screen] = sc.nextLine().trim();
-
-                if (!movieName[screen].isEmpty()) {
-                    break;
-                }
-
-                System.out.println("Invalid Movie Name! Try Again.");
-            }
-            while (true) {
-                System.out.print("Enter Movie Timing (HH:MM): ");
-                timing[screen] = sc.nextLine().trim();
-
-                if (timing[screen].matches("([01]\\d|2[0-3]):([0-5]\\d)")) {
-                    break;
-                }
-
-                System.out.println("Invalid Timing! Try Again.");
-            }
-
-            while (true) {
-                System.out.print("Enter Number of Rows: ");
-
-                if (!sc.hasNextInt()) {
-                    System.out.println("Invalid input!");
-                    sc.next();
-                    continue;
-                }
-
-                rows[screen] = sc.nextInt();
-
-                if (rows[screen] <= 0) {
-                    System.out.println("Rows must be greater than 0.");
-                } else {
-                    break;
-                }
-            }
-
-            while (true) {
-                System.out.print("Enter Seats per Row: ");
-
-                if (!sc.hasNextInt()) {
-                    System.out.println("Invalid input!");
-                    sc.next();
-                    continue;
-                }
-
-                seatsPerRow[screen] = sc.nextInt();
-
-                if (seatsPerRow[screen] <= 0) {
-                    System.out.println("Seats must be greater than 0.");
-                } else {
-                    break;
-                }
-            }
-            sc.nextLine();
-
-            seats[screen] = new SeatStatus[rows[screen]][seatsPerRow[screen]];
-            seatTicketID[screen] = new String[rows[screen]][seatsPerRow[screen]];
-            bookingDate[screen] = new String[rows[screen]][seatsPerRow[screen]];
             for (int i = 0; i < rows[screen]; i++) {
                 for (int j = 0; j < seatsPerRow[screen]; j++) {
+
                     seats[screen][i][j] = SeatStatus.AVAILABLE;
                     seatTicketID[screen][i][j] = "";
                     bookingDate[screen][i][j] = "";
                 }
             }
-            System.out.println("Screen " + (screen + 1) + " setup complete.");
         }
-    try {
-    FileWriter theatre = new FileWriter("d:\\tasks\\theatre.json");
 
-    theatre.write("[\n");
-
-    for (int i = 0; i < Screens; i++) {
-
-        theatre.write(
-            "{\n"
-            + "  \"screenName\": \"" + screenName[i] + "\",\n"
-            + "  \"rows\": " + rows[i] + ",\n"
-            + "  \"seatsPerRow\": " + seatsPerRow[i] + ",\n"
-            + "  \"movieName\": \"" + movieName[i] + "\",\n"
-            + "  \"movieTime\": \"" + timing[i] + "\"\n"
-            + "}"
-        );
-
-        if (i != Screens - 1) {
-            theatre.write(",\n");
-        }
-    }
-
-    theatre.write("\n]");
-    theatre.close();
-
-} catch (Exception e) {
-    System.out.println("Error saving theatre data.");
-}
         // Loading previous data
         try {
             File file = new File("d:\\tasks\\tickets.json");
@@ -184,11 +441,10 @@ class MovieTicketBookingApp {
                     String line = fileReader.nextLine();
                     String[] data = line.split(",");
 
-
                     String id = data[0];
-                    int screen = Integer.parseInt(data[1]) -1;
-                    int r = Integer.parseInt(data[2]) -1;
-                    int s = Integer.parseInt(data[3]) -1;
+                    int screen = Integer.parseInt(data[1]) - 1;
+                    int r = Integer.parseInt(data[2]) - 1;
+                    int s = Integer.parseInt(data[3]) - 1;
 
                     seats[screen][r][s] = SeatStatus.BOOKED;
                     seatTicketID[screen][r][s] = id;
@@ -246,131 +502,131 @@ class MovieTicketBookingApp {
                     }
                     int noOfTickets;
 
-while (true) {
-    System.out.print("Enter Number of Tickets: ");
+                    while (true) {
+                        System.out.print("Enter Number of Tickets: ");
 
-    if (!sc.hasNextInt()) {
-        System.out.println("Invalid input! Please try again.");
-        sc.next();
-        continue;
-    }
-
-    noOfTickets = sc.nextInt();
-    sc.nextLine();
-
-    if (noOfTickets <= 0) {
-        System.out.println("Please enter at least 1 ticket.");
-    } else {
-        break;
-    }
-}
-for (int t = 1; t <= noOfTickets; t++) {
-
-    System.out.println("\nBooking Ticket " + t);
-
-                    System.out.print("Row: ");
-
-                    if (!sc.hasNextInt()) {
-                        System.out.println("Invalid input! Please try again.");
-                        sc.next();
-                        break;
-                    }
-
-                    int row = sc.nextInt() - 1;
-
-                    if (row < 0 || row >= rows[screen]) {
-                        System.out.println("Invalid Row! Please try again.");
-                        break;
-                    }
-
-                    System.out.print("Seat: ");
-
-                    if (!sc.hasNextInt()) {
-                        System.out.println("Invalid input! Please try again.");
-                        sc.next();
-                        break;
-                    }
-
-                    int seat = sc.nextInt() - 1;
-                    sc.nextLine();
-
-                    if (seat < 0 || seat >= seatsPerRow[screen]) {
-                        System.out.println("Invalid Seat! Please try again.");
-                        break;
-                    }
-
-                    if (seats[screen][row][seat] == SeatStatus.AVAILABLE) {
-
-                        while (true) {
-                            System.out.print("Enter Booking Date (DD/MM/YYYY): ");
-                            String bookingDateInput = sc.nextLine();
-
-                            try {
-                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/uuuu")
-                                        .withResolverStyle(ResolverStyle.STRICT);
-
-                                LocalDate date = LocalDate.parse(bookingDateInput, formatter);
-
-                                if (date.isBefore(LocalDate.now())) {
-                                    System.out.println("Past date is not allowed. Please try again.");
-                                    continue;
-                                }
-
-                                seats[screen][row][seat] = SeatStatus.BOOKED;
-                                String ticketID = "T" + ticketCounter++;
-                                seatTicketID[screen][row][seat] = ticketID;
-                                bookingDate[screen][row][seat] = bookingDateInput;
-                                System.out.println("Advance Booking Successful.");
-                                System.out.println("Booking Date: " + bookingDateInput);
-                                System.out.println("Movie Timing: " + timing[screen]);
-                                System.out.println("Ticket ID: " + ticketID);
-                                try {
-
-                                    FileWriter fw = new FileWriter("d:\\tasks\\tickets.json");
-
-                                    for (int s = 0; s < Screens; s++) {
-
-                                        for (int i = 0; i < rows[s]; i++) {
-
-                                            for (int j = 0; j < seatsPerRow[s]; j++) {
-
-                                                if (seats[s][i][j] == SeatStatus.BOOKED) {
-                                                    fw.write(
-                                                            "{\n"
-                                                            + "  \"ticketID\": \"" + seatTicketID[s][i][j] + "\",\n"
-                                                            + "  \"screen\": " + (s + 1) + ",\n"
-                                                            + "  \"row\": " + (i + 1) + ",\n"
-                                                            + "  \"seat\": " + (j + 1) + ",\n"
-                                                            + "  \"movieName\": \"" + movieName[s] + "\",\n"
-                                                            + "  \"movieTime\": \"" + timing[s] + "\",\n"
-                                                            + "  \"bookingDate\": \"" + bookingDate[s][i][j] + "\"\n"
-                                                            + "}\n"
-                                                    );
-                                                    System.out.println("Saving: " + seatTicketID[s][i][j]);
-
-                                                }
-
-                                            }
-                                        }
-                                    }
-
-                                    fw.close();
-                                    System.out.println("Booking Data Saved Successfully.");
-
-                                } catch (Exception e) {
-                                    System.out.println("Error Saving File");
-                                }
-                                break;
-
-                            } catch (Exception e) {
-                                System.out.println("Invalid input! Please try again.");
-                            }
+                        if (!sc.hasNextInt()) {
+                            System.out.println("Invalid input! Please try again.");
+                            sc.next();
+                            continue;
                         }
 
-                    } else {
-                        System.out.println("Seat Already Booked.");
+                        noOfTickets = sc.nextInt();
+                        sc.nextLine();
+
+                        if (noOfTickets <= 0) {
+                            System.out.println("Please enter at least 1 ticket.");
+                        } else {
+                            break;
+                        }
                     }
-}
+                    for (int t = 1; t <= noOfTickets; t++) {
+
+                        System.out.println("\nBooking Ticket " + t);
+
+                        System.out.print("Row: ");
+
+                        if (!sc.hasNextInt()) {
+                            System.out.println("Invalid input! Please try again.");
+                            sc.next();
+                            break;
+                        }
+
+                        int row = sc.nextInt() - 1;
+
+                        if (row < 0 || row >= rows[screen]) {
+                            System.out.println("Invalid Row! Please try again.");
+                            break;
+                        }
+
+                        System.out.print("Seat: ");
+
+                        if (!sc.hasNextInt()) {
+                            System.out.println("Invalid input! Please try again.");
+                            sc.next();
+                            break;
+                        }
+
+                        int seat = sc.nextInt() - 1;
+                        sc.nextLine();
+
+                        if (seat < 0 || seat >= seatsPerRow[screen]) {
+                            System.out.println("Invalid Seat! Please try again.");
+                            break;
+                        }
+
+                        if (seats[screen][row][seat] == SeatStatus.AVAILABLE) {
+
+                            while (true) {
+                                System.out.print("Enter Booking Date (DD/MM/YYYY): ");
+                                String bookingDateInput = sc.nextLine();
+
+                                try {
+                                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/uuuu")
+                                            .withResolverStyle(ResolverStyle.STRICT);
+
+                                    LocalDate date = LocalDate.parse(bookingDateInput, formatter);
+
+                                    if (date.isBefore(LocalDate.now())) {
+                                        System.out.println("Past date is not allowed. Please try again.");
+                                        continue;
+                                    }
+
+                                    seats[screen][row][seat] = SeatStatus.BOOKED;
+                                    String ticketID = "T" + ticketCounter++;
+                                    seatTicketID[screen][row][seat] = ticketID;
+                                    bookingDate[screen][row][seat] = bookingDateInput;
+                                    System.out.println("Advance Booking Successful.");
+                                    System.out.println("Booking Date: " + bookingDateInput);
+                                    System.out.println("Movie Timing: " + timing[screen]);
+                                    System.out.println("Ticket ID: " + ticketID);
+                                    try {
+
+                                        FileWriter fw = new FileWriter("d:\\tasks\\tickets.json");
+
+                                        for (int s = 0; s < Screens; s++) {
+
+                                            for (int i = 0; i < rows[s]; i++) {
+
+                                                for (int j = 0; j < seatsPerRow[s]; j++) {
+
+                                                    if (seats[s][i][j] == SeatStatus.BOOKED) {
+                                                        fw.write(
+                                                                "{\n"
+                                                                + "  \"ticketID\": \"" + seatTicketID[s][i][j] + "\",\n"
+                                                                + "  \"screen\": " + (s + 1) + ",\n"
+                                                                + "  \"row\": " + (i + 1) + ",\n"
+                                                                + "  \"seat\": " + (j + 1) + ",\n"
+                                                                + "  \"movieName\": \"" + movieName[s] + "\",\n"
+                                                                + "  \"movieTime\": \"" + timing[s] + "\",\n"
+                                                                + "  \"bookingDate\": \"" + bookingDate[s][i][j] + "\"\n"
+                                                                + "}\n"
+                                                        );
+                                                        System.out.println("Saving: " + seatTicketID[s][i][j]);
+
+                                                    }
+
+                                                }
+                                            }
+                                        }
+
+                                        fw.close();
+                                        System.out.println("Booking Data Saved Successfully.");
+
+                                    } catch (Exception e) {
+                                        System.out.println("Error Saving File");
+                                    }
+                                    break;
+
+                                } catch (Exception e) {
+                                    System.out.println("Invalid input! Please try again.");
+                                }
+                            }
+
+                        } else {
+                            System.out.println("Seat Already Booked.");
+                        }
+                    }
                     break;
 
                 case 2:
@@ -433,4 +689,77 @@ for (int t = 1; t <= noOfTickets; t++) {
             }
         }
     }
+
+    static String readFile(String fileName) //File lo unna complete data ni read chesi string ga return chestundi.
+            throws IOException {
+
+        StringBuilder content = new StringBuilder(); //edhi file lo unna content ni store cheyadaniki use chestunnam
+
+        BufferedReader br = new BufferedReader(new FileReader(fileName));
+
+        String line;
+
+        while ((line = br.readLine()) != null) {
+            content.append(line);
+        }
+
+        br.close();
+
+        return content.toString();
+    }
+
+    static int getScreenCount() {
+
+        int count = 0;
+
+        try {
+
+            String json
+                    = readFile("d:\\tasks\\theatre.json");
+
+            Pattern pattern = Pattern.compile("\"screenName\"");
+
+            Matcher matcher = pattern.matcher(json);
+
+            while (matcher.find()) {
+                count++;
+            }
+
+        } catch (Exception e) {
+
+            return 0;
+        }
+
+        return count;
+    }
+
+    static String getJsonString(String object, String key) {
+
+        Pattern pattern
+                = Pattern.compile("\"" + key + "\"\\s*:\\s*\"(.*?)\"");
+
+        Matcher matcher = pattern.matcher(object);
+
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+
+        return "";
+    }
+
+    static int getJsonInt(String object, String key) {
+
+        Pattern pattern
+                = Pattern.compile("\"" + key + "\"\\s*:\\s*(\\d+)");
+
+        Matcher matcher
+                = pattern.matcher(object);
+
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group(1));
+        }
+
+        return 0;
+    }
+
 }
