@@ -6,9 +6,13 @@ import java.time.format.ResolverStyle;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 class MovieTicketBookingApp {
-
+private static final ObjectMapper mapper = new ObjectMapper();
     // enum for seat status
     enum SeatStatus {
         AVAILABLE, BOOKED
@@ -20,6 +24,7 @@ class MovieTicketBookingApp {
     public static final String RESET = "\u001B[0m";
 
     public static void main(String[] args) {
+        System.out.println("Jackson is working!");
 
         Scanner sc = new Scanner(System.in);
 
@@ -75,37 +80,25 @@ class MovieTicketBookingApp {
 
             try {
 
-                String json = readFile("d:\\tasks\\theatre.json");
+               JsonNode theatreData = mapper.readTree(theatreFile);
 
-                Pattern objectPattern
-                        = Pattern.compile("\\{(.*?)\\}", Pattern.DOTALL);
+if (!theatreData.isArray() || theatreData.size() != Screens) {
+    throw new IOException("Invalid theatre.json format.");
+}
 
-                Matcher matcher = objectPattern.matcher(json);
+int screen = 0;
 
-                int screen = 0;
+while (screen < Screens) {
+    JsonNode item = theatreData.get(screen);
 
-                while (matcher.find() && screen < Screens) {
+    screenName[screen] = item.path("screenName").asText();
+    movieName[screen] = item.path("movieName").asText();
+    timing[screen] = item.path("movieTime").asText();
+    rows[screen] = item.path("rows").asInt();
+    seatsPerRow[screen] = item.path("seatsPerRow").asInt();
 
-                    String object = matcher.group(1);
-
-                    screenName[screen]
-                            = getJsonString(object, "screenName");
-
-                    movieName[screen]
-                            = getJsonString(object, "movieName");
-
-                    timing[screen]
-                            = getJsonString(object, "movieTime");
-
-                    rows[screen]
-                            = getJsonInt(object, "rows");
-
-                    seatsPerRow[screen]
-                            = getJsonInt(object, "seatsPerRow");
-
-                    screen++;
-                }
-
+    screen++;
+}
                 System.out.println(
                         "Previous theatre details loaded successfully.");
 
@@ -191,16 +184,15 @@ class MovieTicketBookingApp {
                             newscreen++) {
 
                         System.out.println("\nEnter details for Screen "
-                                + (screen + 1));
+        + (newscreen + 1));
 
                         while (true) {
 
                             System.out.print("Enter Screen Name: ");
 
-                            screenName[screen]
-                                    = sc.nextLine().trim();
+                          screenName[newscreen] = sc.nextLine().trim();
 
-                            if (!screenName[screen].isEmpty()) {
+                            if (!screenName[newscreen].isEmpty()) {
                                 break;
                             }
 
@@ -211,9 +203,9 @@ class MovieTicketBookingApp {
 
                             System.out.print("Enter Movie Name: ");
 
-                            movieName[screen] = sc.nextLine().trim();
+                            movieName[newscreen] = sc.nextLine().trim();
 
-                            if (!movieName[screen].isEmpty()) {
+                            if (!movieName[newscreen].isEmpty()) {
                                 break;
                             }
 
@@ -225,10 +217,10 @@ class MovieTicketBookingApp {
 
                             System.out.print("Enter Movie Timing (HH:MM): ");
 
-                            timing[screen]
+                            timing[newscreen]
                                     = sc.nextLine().trim();
 
-                            if (timing[screen].matches("([01]\\d|2[0-3]):([0-5]\\d)")) {
+                            if (timing[newscreen].matches("([01]\\d|2[0-3]):([0-5]\\d)")) {
 
                                 break;
                             }
@@ -248,9 +240,9 @@ class MovieTicketBookingApp {
                                 continue;
                             }
 
-                            rows[screen] = sc.nextInt();
+                            rows[newscreen] = sc.nextInt();
 
-                            if (rows[screen] <= 0) {
+                            if (rows[newscreen] <= 0) {
 
                                 System.out.println("Rows must be greater than 0.");
 
@@ -273,9 +265,9 @@ class MovieTicketBookingApp {
                                 continue;
                             }
 
-                            seatsPerRow[screen] = sc.nextInt();
+                            seatsPerRow[newscreen] = sc.nextInt();
 
-                            if (seatsPerRow[screen] <= 0) {
+                            if (seatsPerRow[newscreen] <= 0) {
 
                                 System.out.println("Seats must be greater than 0.");
 
@@ -287,10 +279,13 @@ class MovieTicketBookingApp {
 
                         sc.nextLine();
 
-                        System.out.println("Screen " + (screen + 1) + " setup complete.");
+                        System.out.println("Screen " + (newscreen + 1) + " setup complete.");
                     }
 
                     Screens = totalScreens;
+                    seats = new SeatStatus[Screens][][];
+seatTicketID = new String[Screens][][];
+bookingDate = new String[Screens][][];
                 }
 
             } catch (Exception e) {
@@ -303,15 +298,15 @@ class MovieTicketBookingApp {
         } else {
 
             // setup for screens
-            for (int screen = 0; screen < Screens; screen++) {
+            for (int newscreen = 0; newscreen < Screens; newscreen++) {
 
-                System.out.println("\nEnter details for Screen " + (screen + 1));
+                System.out.println("\nEnter details for Screen " + (newscreen + 1));
 
                 while (true) {
                     System.out.print("Enter Screen Name: ");
-                    screenName[screen] = sc.nextLine().trim();
+                    screenName[newscreen] = sc.nextLine().trim();
 
-                    if (!screenName[screen].isEmpty()) {
+                    if (!screenName[newscreen].isEmpty()) {
                         break;
                     }
 
@@ -320,9 +315,9 @@ class MovieTicketBookingApp {
 
                 while (true) {
                     System.out.print("Enter Movie Name: ");
-                    movieName[screen] = sc.nextLine().trim();
+                    movieName[newscreen] = sc.nextLine().trim();
 
-                    if (!movieName[screen].isEmpty()) {
+                    if (!movieName[newscreen].isEmpty()) {
                         break;
                     }
 
@@ -330,9 +325,9 @@ class MovieTicketBookingApp {
                 }
                 while (true) {
                     System.out.print("Enter Movie Timing (HH:MM): ");
-                    timing[screen] = sc.nextLine().trim();
+                    timing[newscreen] = sc.nextLine().trim();
 
-                    if (timing[screen].matches("([01]\\d|2[0-3]):([0-5]\\d)")) {
+                    if (timing[newscreen].matches("([01]\\d|2[0-3]):([0-5]\\d)")) {
                         break;
                     }
 
@@ -348,9 +343,9 @@ class MovieTicketBookingApp {
                         continue;
                     }
 
-                    rows[screen] = sc.nextInt();
+                    rows[newscreen] = sc.nextInt();
 
-                    if (rows[screen] <= 0) {
+                    if (rows[newscreen] <= 0) {
                         System.out.println("Rows must be greater than 0.");
                     } else {
                         break;
@@ -366,9 +361,9 @@ class MovieTicketBookingApp {
                         continue;
                     }
 
-                    seatsPerRow[screen] = sc.nextInt();
+                    seatsPerRow[newscreen] = sc.nextInt();
 
-                    if (seatsPerRow[screen] <= 0) {
+                    if (seatsPerRow[newscreen] <= 0) {
                         System.out.println("Seats must be greater than 0.");
                     } else {
                         break;
@@ -376,97 +371,102 @@ class MovieTicketBookingApp {
                 }
                 sc.nextLine();
 
-                System.out.println("Screen " + (screen + 1) + " setup complete.");
+                System.out.println("Screen " + (newscreen + 1) + " setup complete.");
             }
             try {
-                FileWriter theatre = new FileWriter("d:\\tasks\\theatre.json");
+    ArrayNode theatreData = mapper.createArrayNode();
 
-                theatre.write("[\n");
+    for (int i = 0; i < Screens; i++) {
+        ObjectNode item = mapper.createObjectNode();
 
-                for (int i = 0; i < Screens; i++) {
+        item.put("screenName", screenName[i]);
+        item.put("rows", rows[i]);
+        item.put("seatsPerRow", seatsPerRow[i]);
+        item.put("movieName", movieName[i]);
+        item.put("movieTime", timing[i]);
 
-                    theatre.write(
-                            "{\n"
-                            + "  \"screenName\": \"" + screenName[i] + "\",\n"
-                            + "  \"rows\": " + rows[i] + ",\n"
-                            + "  \"seatsPerRow\": " + seatsPerRow[i] + ",\n"
-                            + "  \"movieName\": \"" + movieName[i] + "\",\n"
-                            + "  \"movieTime\": \"" + timing[i] + "\"\n"
-                            + "}"
-                    );
+        theatreData.add(item);
+    }
 
-                    if (i != Screens - 1) {
-                        theatre.write(",");
-                    }
-                }
+    mapper.writerWithDefaultPrettyPrinter()
+          .writeValue(theatreFile, theatreData);
 
-                theatre.write("]");
-                theatre.close();
+    System.out.println("Theatre data saved successfully.");
 
-            } catch (Exception e) {
-                System.out.println("Error saving theatre data.");
-            }
+} catch (IOException e) {
+    System.out.println("Error saving theatre data: " + e.getMessage());
+}
         }
-        for (int screen = 0; screen < Screens; screen++) {
+        for (int newscreen = 0; newscreen < Screens; newscreen++) {
 
-            seats[screen]
-                    = new SeatStatus[rows[screen]][seatsPerRow[screen]];
+            seats[newscreen] = new SeatStatus[rows[newscreen]][seatsPerRow[newscreen]];
 
-            seatTicketID[screen]
-                    = new String[rows[screen]][seatsPerRow[screen]];
+            seatTicketID[newscreen] = new String[rows[newscreen]][seatsPerRow[newscreen]];
 
-            bookingDate[screen]
-                    = new String[rows[screen]][seatsPerRow[screen]];
+            bookingDate[newscreen] = new String[rows[newscreen]][seatsPerRow[newscreen]];
 
-            for (int i = 0; i < rows[screen]; i++) {
-                for (int j = 0; j < seatsPerRow[screen]; j++) {
+            for (int i = 0; i < rows[newscreen]; i++) {
+                for (int j = 0; j < seatsPerRow[newscreen]; j++) {
 
-                    seats[screen][i][j] = SeatStatus.AVAILABLE;
-                    seatTicketID[screen][i][j] = "";
-                    bookingDate[screen][i][j] = "";
+                    seats[newscreen][i][j] = SeatStatus.AVAILABLE;
+                    seatTicketID[newscreen][i][j] = "";
+                    bookingDate[newscreen][i][j] = "";
                 }
             }
         }
+            
+           
+try {
+    File file = new File("D:\\tasks\\Backup\\tickets.json");
 
-        // Loading previous data
-        try {
-            File file = new File("d:\\tasks\\tickets.json");
+    System.out.println("Reading ticket file: " + file.getAbsolutePath());
 
-            if (file.exists()) {
+    if (file.exists() && file.length() > 0) {
+        JsonNode ticketData = mapper.readTree(file);
 
-                Scanner fileReader = new Scanner(file);
+        if (!ticketData.isArray()) {
+            throw new IOException("Invalid tickets.json format.");
+        }
 
-                while (fileReader.hasNextLine()) {
+        System.out.println("Tickets found: " + ticketData.size());
 
-                    String line = fileReader.nextLine();
-                    String[] data = line.split(",");
+        for (JsonNode ticket : ticketData) {
+            String id = ticket.path("ticketID").asText();
+            int screen = ticket.path("screen").asInt() - 1;
+            int r = ticket.path("row").asInt() - 1;
+            int s = ticket.path("seat").asInt() - 1;
+            String date = ticket.path("bookingDate").asText();
 
-                    String id = data[0];
-                    int screen = Integer.parseInt(data[1]) - 1;
-                    int r = Integer.parseInt(data[2]) - 1;
-                    int s = Integer.parseInt(data[3]) - 1;
+            if (screen >= 0 && screen < Screens
+                    && r >= 0 && r < rows[screen]
+                    && s >= 0 && s < seatsPerRow[screen]
+                    && !id.isEmpty()) {
 
-                    seats[screen][r][s] = SeatStatus.BOOKED;
-                    seatTicketID[screen][r][s] = id;
+                seats[screen][r][s] = SeatStatus.BOOKED;
+                seatTicketID[screen][r][s] = id;
+                bookingDate[screen][r][s] = date;
 
+                if (id.matches("T\\d+")) {
                     int number = Integer.parseInt(id.substring(1));
-                    if (number >= ticketCounter) {
-                        ticketCounter = number + 1;
-                    }
+                    ticketCounter = Math.max(ticketCounter, number + 1);
                 }
-                fileReader.close();
-                System.out.println("Previous booking data loaded successfully.");
-
             }
-
-        } catch (Exception e) {
-            System.out.println("No Previous Data Found. Starting a new session.");
         }
+
+        System.out.println("Previous booking data loaded successfully.");
+    } else {
+        System.out.println("No Previous Data Found. Starting a new session.");
+    }
+} catch (Exception e) {
+    System.out.println("Error loading ticket data: " + e.getMessage());
+}
+
+
+
         while (true) {
 
             System.out.println("\n");
             System.out.println("MOVIE TICKET BOOKING SYSTEM");
-            System.out.println(",");
             System.out.println("1. Book Ticket");
             System.out.println("2. Cancel Ticket");
             System.out.println("3. View Seats");
@@ -582,36 +582,35 @@ class MovieTicketBookingApp {
                                     System.out.println("Ticket ID: " + ticketID);
                                     try {
 
-                                        FileWriter fw = new FileWriter("d:\\tasks\\tickets.json");
+                                       
+File ticketsFile = new File("D:\\tasks\\Backup\\tickets.json");
+ArrayNode ticketData = mapper.createArrayNode();
 
-                                        for (int s = 0; s < Screens; s++) {
+for (int s = 0; s < Screens; s++) {
+    for (int i = 0; i < rows[s]; i++) {
+        for (int j = 0; j < seatsPerRow[s]; j++) {
 
-                                            for (int i = 0; i < rows[s]; i++) {
+            if (seats[s][i][j] == SeatStatus.BOOKED) {
+                ObjectNode ticket = mapper.createObjectNode();
 
-                                                for (int j = 0; j < seatsPerRow[s]; j++) {
+                ticket.put("ticketID", seatTicketID[s][i][j]);
+                ticket.put("screen", s + 1);
+                ticket.put("row", i + 1);
+                ticket.put("seat", j + 1);
+                ticket.put("movieName", movieName[s]);
+                ticket.put("movieTime", timing[s]);
+                ticket.put("bookingDate", bookingDate[s][i][j]);
 
-                                                    if (seats[s][i][j] == SeatStatus.BOOKED) {
-                                                        fw.write(
-                                                                "{\n"
-                                                                + "  \"ticketID\": \"" + seatTicketID[s][i][j] + "\",\n"
-                                                                + "  \"screen\": " + (s + 1) + ",\n"
-                                                                + "  \"row\": " + (i + 1) + ",\n"
-                                                                + "  \"seat\": " + (j + 1) + ",\n"
-                                                                + "  \"movieName\": \"" + movieName[s] + "\",\n"
-                                                                + "  \"movieTime\": \"" + timing[s] + "\",\n"
-                                                                + "  \"bookingDate\": \"" + bookingDate[s][i][j] + "\"\n"
-                                                                + "}\n"
-                                                        );
-                                                        System.out.println("Saving: " + seatTicketID[s][i][j]);
+                ticketData.add(ticket);
+            }
+        }
+    }
+}
 
-                                                    }
+mapper.writerWithDefaultPrettyPrinter().writeValue(ticketsFile, ticketData);
+System.out.println("Booking Data Saved Successfully.");
 
-                                                }
-                                            }
-                                        }
-
-                                        fw.close();
-                                        System.out.println("Booking Data Saved Successfully.");
+                                       
 
                                     } catch (Exception e) {
                                         System.out.println("Error Saving File");
@@ -690,10 +689,9 @@ class MovieTicketBookingApp {
         }
     }
 
-    static String readFile(String fileName) //File lo unna complete data ni read chesi string ga return chestundi.
-            throws IOException {
+private static String readFile(String fileName)            throws IOException {
 
-        StringBuilder content = new StringBuilder(); //edhi file lo unna content ni store cheyadaniki use chestunnam
+        StringBuilder content = new StringBuilder(); 
 
         BufferedReader br = new BufferedReader(new FileReader(fileName));
 
@@ -708,7 +706,7 @@ class MovieTicketBookingApp {
         return content.toString();
     }
 
-    static int getScreenCount() {
+    private static int getScreenCount() {
 
         int count = 0;
 
@@ -733,7 +731,7 @@ class MovieTicketBookingApp {
         return count;
     }
 
-    static String getJsonString(String object, String key) {
+    private static String getJsonString(String object, String key) {
 
         Pattern pattern
                 = Pattern.compile("\"" + key + "\"\\s*:\\s*\"(.*?)\"");
@@ -747,7 +745,7 @@ class MovieTicketBookingApp {
         return "";
     }
 
-    static int getJsonInt(String object, String key) {
+    private static int getJsonInt(String object, String key) {
 
         Pattern pattern
                 = Pattern.compile("\"" + key + "\"\\s*:\\s*(\\d+)");
