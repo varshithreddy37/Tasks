@@ -12,7 +12,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 class MovieTicketBookingApp {
-private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     // enum for seat status
     enum SeatStatus {
         AVAILABLE, BOOKED
@@ -80,25 +81,25 @@ private static final ObjectMapper mapper = new ObjectMapper();
 
             try {
 
-               JsonNode theatreData = mapper.readTree(theatreFile);
+                JsonNode theatreData = mapper.readTree(theatreFile);
 
-if (!theatreData.isArray() || theatreData.size() != Screens) {
-    throw new IOException("Invalid theatre.json format.");
-}
+                if (!theatreData.isArray() || theatreData.size() != Screens) {
+                    throw new IOException("Invalid theatre.json format.");
+                }
 
-int screen = 0;
+                int screen = 0;
 
-while (screen < Screens) {
-    JsonNode item = theatreData.get(screen);
+                while (screen < Screens) {
+                    JsonNode item = theatreData.get(screen);
 
-    screenName[screen] = item.path("screenName").asText();
-    movieName[screen] = item.path("movieName").asText();
-    timing[screen] = item.path("movieTime").asText();
-    rows[screen] = item.path("rows").asInt();
-    seatsPerRow[screen] = item.path("seatsPerRow").asInt();
+                    screenName[screen] = item.path("screenName").asText();
+                    movieName[screen] = item.path("movieName").asText();
+                    timing[screen] = item.path("movieTime").asText();
+                    rows[screen] = item.path("rows").asInt();
+                    seatsPerRow[screen] = item.path("seatsPerRow").asInt();
 
-    screen++;
-}
+                    screen++;
+                }
                 System.out.println(
                         "Previous theatre details loaded successfully.");
 
@@ -179,18 +180,16 @@ while (screen < Screens) {
                     }
 
                     // Enter the new movie details
-                    for (int newscreen = oldScreens;
-                            newscreen < totalScreens;
-                            newscreen++) {
+                    for (int newscreen = oldScreens; newscreen < totalScreens; newscreen++) {
 
                         System.out.println("\nEnter details for Screen "
-        + (newscreen + 1));
+                                + (newscreen + 1));
 
                         while (true) {
 
                             System.out.print("Enter Screen Name: ");
 
-                          screenName[newscreen] = sc.nextLine().trim();
+                            screenName[newscreen] = sc.nextLine().trim();
 
                             if (!screenName[newscreen].isEmpty()) {
                                 break;
@@ -217,8 +216,7 @@ while (screen < Screens) {
 
                             System.out.print("Enter Movie Timing (HH:MM): ");
 
-                            timing[newscreen]
-                                    = sc.nextLine().trim();
+                            timing[newscreen] = sc.nextLine().trim();
 
                             if (timing[newscreen].matches("([01]\\d|2[0-3]):([0-5]\\d)")) {
 
@@ -284,8 +282,8 @@ while (screen < Screens) {
 
                     Screens = totalScreens;
                     seats = new SeatStatus[Screens][][];
-seatTicketID = new String[Screens][][];
-bookingDate = new String[Screens][][];
+                    seatTicketID = new String[Screens][][];
+                    bookingDate = new String[Screens][][];
                 }
 
             } catch (Exception e) {
@@ -374,28 +372,28 @@ bookingDate = new String[Screens][][];
                 System.out.println("Screen " + (newscreen + 1) + " setup complete.");
             }
             try {
-    ArrayNode theatreData = mapper.createArrayNode();
+                ArrayNode theatreData = mapper.createArrayNode();
 
-    for (int i = 0; i < Screens; i++) {
-        ObjectNode item = mapper.createObjectNode();
+                for (int i = 0; i < Screens; i++) {
+                    ObjectNode item = mapper.createObjectNode();
 
-        item.put("screenName", screenName[i]);
-        item.put("rows", rows[i]);
-        item.put("seatsPerRow", seatsPerRow[i]);
-        item.put("movieName", movieName[i]);
-        item.put("movieTime", timing[i]);
+                    item.put("screenName", screenName[i]);
+                    item.put("rows", rows[i]);
+                    item.put("seatsPerRow", seatsPerRow[i]);
+                    item.put("movieName", movieName[i]);
+                    item.put("movieTime", timing[i]);
 
-        theatreData.add(item);
-    }
+                    theatreData.add(item);
+                }
 
-    mapper.writerWithDefaultPrettyPrinter()
-          .writeValue(theatreFile, theatreData);
+                mapper.writerWithDefaultPrettyPrinter()
+                        .writeValue(theatreFile, theatreData);
 
-    System.out.println("Theatre data saved successfully.");
+                System.out.println("Theatre data saved successfully.");
 
-} catch (IOException e) {
-    System.out.println("Error saving theatre data: " + e.getMessage());
-}
+            } catch (IOException e) {
+                System.out.println("Error saving theatre data: " + e.getMessage());
+            }
         }
         for (int newscreen = 0; newscreen < Screens; newscreen++) {
 
@@ -414,54 +412,51 @@ bookingDate = new String[Screens][][];
                 }
             }
         }
-            
-           
-try {
-    File file = new File("D:\\tasks\\Backup\\tickets.json");
 
-    System.out.println("Reading ticket file: " + file.getAbsolutePath());
+        try {
+            File file = new File("D:\\tasks\\Backup\\tickets.json");
 
-    if (file.exists() && file.length() > 0) {
-        JsonNode ticketData = mapper.readTree(file);
+            System.out.println("Reading ticket file: " + file.getAbsolutePath());
 
-        if (!ticketData.isArray()) {
-            throw new IOException("Invalid tickets.json format.");
-        }
+            if (file.exists() && file.length() > 0) {
+                JsonNode ticketData = mapper.readTree(file);
 
-        System.out.println("Tickets found: " + ticketData.size());
-
-        for (JsonNode ticket : ticketData) {
-            String id = ticket.path("ticketID").asText();
-            int screen = ticket.path("screen").asInt() - 1;
-            int r = ticket.path("row").asInt() - 1;
-            int s = ticket.path("seat").asInt() - 1;
-            String date = ticket.path("bookingDate").asText();
-
-            if (screen >= 0 && screen < Screens
-                    && r >= 0 && r < rows[screen]
-                    && s >= 0 && s < seatsPerRow[screen]
-                    && !id.isEmpty()) {
-
-                seats[screen][r][s] = SeatStatus.BOOKED;
-                seatTicketID[screen][r][s] = id;
-                bookingDate[screen][r][s] = date;
-
-                if (id.matches("T\\d+")) {
-                    int number = Integer.parseInt(id.substring(1));
-                    ticketCounter = Math.max(ticketCounter, number + 1);
+                if (!ticketData.isArray()) {
+                    throw new IOException("Invalid tickets.json format.");
                 }
+
+                System.out.println("Tickets found: " + ticketData.size());
+
+                for (JsonNode ticket : ticketData) {
+                    String id = ticket.path("ticketID").asText();
+                    int screen = ticket.path("screen").asInt() - 1;
+                    int r = ticket.path("row").asInt() - 1;
+                    int s = ticket.path("seat").asInt() - 1;
+                    String date = ticket.path("bookingDate").asText();
+
+                    if (screen >= 0 && screen < Screens
+                            && r >= 0 && r < rows[screen]
+                            && s >= 0 && s < seatsPerRow[screen]
+                            && !id.isEmpty()) {
+
+                        seats[screen][r][s] = SeatStatus.BOOKED;
+                        seatTicketID[screen][r][s] = id;
+                        bookingDate[screen][r][s] = date;
+
+                        if (id.matches("T\\d+")) {
+                            int number = Integer.parseInt(id.substring(1));
+                            ticketCounter = Math.max(ticketCounter, number + 1);
+                        }
+                    }
+                }
+
+                System.out.println("Previous booking data loaded successfully.");
+            } else {
+                System.out.println("No Previous Data Found. Starting a new session.");
             }
+        } catch (Exception e) {
+            System.out.println("Error loading ticket data: " + e.getMessage());
         }
-
-        System.out.println("Previous booking data loaded successfully.");
-    } else {
-        System.out.println("No Previous Data Found. Starting a new session.");
-    }
-} catch (Exception e) {
-    System.out.println("Error loading ticket data: " + e.getMessage());
-}
-
-
 
         while (true) {
 
@@ -582,35 +577,32 @@ try {
                                     System.out.println("Ticket ID: " + ticketID);
                                     try {
 
-                                       
-File ticketsFile = new File("D:\\tasks\\Backup\\tickets.json");
-ArrayNode ticketData = mapper.createArrayNode();
+                                        File ticketsFile = new File("D:\\tasks\\Backup\\tickets.json");
+                                        ArrayNode ticketData = mapper.createArrayNode();
 
-for (int s = 0; s < Screens; s++) {
-    for (int i = 0; i < rows[s]; i++) {
-        for (int j = 0; j < seatsPerRow[s]; j++) {
+                                        for (int s = 0; s < Screens; s++) {
+                                            for (int i = 0; i < rows[s]; i++) {
+                                                for (int j = 0; j < seatsPerRow[s]; j++) {
 
-            if (seats[s][i][j] == SeatStatus.BOOKED) {
-                ObjectNode ticket = mapper.createObjectNode();
+                                                    if (seats[s][i][j] == SeatStatus.BOOKED) {
+                                                        ObjectNode ticket = mapper.createObjectNode();
 
-                ticket.put("ticketID", seatTicketID[s][i][j]);
-                ticket.put("screen", s + 1);
-                ticket.put("row", i + 1);
-                ticket.put("seat", j + 1);
-                ticket.put("movieName", movieName[s]);
-                ticket.put("movieTime", timing[s]);
-                ticket.put("bookingDate", bookingDate[s][i][j]);
+                                                        ticket.put("ticketID", seatTicketID[s][i][j]);
+                                                        ticket.put("screen", s + 1);
+                                                        ticket.put("row", i + 1);
+                                                        ticket.put("seat", j + 1);
+                                                        ticket.put("movieName", movieName[s]);
+                                                        ticket.put("movieTime", timing[s]);
+                                                        ticket.put("bookingDate", bookingDate[s][i][j]);
 
-                ticketData.add(ticket);
-            }
-        }
-    }
-}
+                                                        ticketData.add(ticket);
+                                                    }
+                                                }
+                                            }
+                                        }
 
-mapper.writerWithDefaultPrettyPrinter().writeValue(ticketsFile, ticketData);
-System.out.println("Booking Data Saved Successfully.");
-
-                                       
+                                        mapper.writerWithDefaultPrettyPrinter().writeValue(ticketsFile, ticketData);
+                                        System.out.println("Booking Data Saved Successfully.");
 
                                     } catch (Exception e) {
                                         System.out.println("Error Saving File");
@@ -689,9 +681,9 @@ System.out.println("Booking Data Saved Successfully.");
         }
     }
 
-private static String readFile(String fileName)            throws IOException {
+    private static String readFile(String fileName) throws IOException {
 
-        StringBuilder content = new StringBuilder(); 
+        StringBuilder content = new StringBuilder();
 
         BufferedReader br = new BufferedReader(new FileReader(fileName));
 
@@ -712,8 +704,7 @@ private static String readFile(String fileName)            throws IOException {
 
         try {
 
-            String json
-                    = readFile("d:\\tasks\\theatre.json");
+            String json = readFile("d:\\tasks\\theatre.json");
 
             Pattern pattern = Pattern.compile("\"screenName\"");
 
@@ -733,8 +724,7 @@ private static String readFile(String fileName)            throws IOException {
 
     private static String getJsonString(String object, String key) {
 
-        Pattern pattern
-                = Pattern.compile("\"" + key + "\"\\s*:\\s*\"(.*?)\"");
+        Pattern pattern = Pattern.compile("\"" + key + "\"\\s*:\\s*\"(.*?)\"");
 
         Matcher matcher = pattern.matcher(object);
 
@@ -747,11 +737,9 @@ private static String readFile(String fileName)            throws IOException {
 
     private static int getJsonInt(String object, String key) {
 
-        Pattern pattern
-                = Pattern.compile("\"" + key + "\"\\s*:\\s*(\\d+)");
+        Pattern pattern = Pattern.compile("\"" + key + "\"\\s*:\\s*(\\d+)");
 
-        Matcher matcher
-                = pattern.matcher(object);
+        Matcher matcher = pattern.matcher(object);
 
         if (matcher.find()) {
             return Integer.parseInt(matcher.group(1));
